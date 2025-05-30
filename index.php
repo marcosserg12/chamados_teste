@@ -12,6 +12,7 @@ $uri = $_SERVER['HTTP_HOST'];
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sistema de Chamados</title>
+    <script src="../assets/js/custom/scripts/jquery-3.7.1.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
@@ -77,7 +78,7 @@ $uri = $_SERVER['HTTP_HOST'];
     </div>
 </body>
 
-<script src="../assets/js/custom/scripts/jquery-3.7.1.min.js"></script>
+
     <script src="../assets/js/custom/scripts/sweetalert2.js"></script>
 
 <script src="./assets/js/appLogin/login.js" type="text/javascript"></script>
