@@ -1,0 +1,1511 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Chamados</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .gradient-bg {
+            background: linear-gradient(135deg, #6b73ff 0%, #000dff 100%);
+        }
+        .ticket-card {
+            transition: all 0.3s ease;
+        }
+        .ticket-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        }
+        .file-preview {
+            max-width: 100px;
+            max-height: 100px;
+            object-fit: cover;
+            border-radius: 5px;
+            margin-right: 10px;
+            margin-bottom: 10px;
+        }
+        .sidebar {
+            transition: all 0.3s ease;
+        }
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+                position: absolute;
+                z-index: 50;
+                height: 100vh;
+            }
+            .sidebar.open {
+                transform: translateX(0);
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-100 font-sans">
+    <!-- Login Modal -->
+    <div id="loginModal" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+        <div class="bg-white rounded-lg shadow-xl p-8 w-full max-w-md">
+            <h2 class="text-2xl font-bold text-center mb-6 text-gray-800">Login</h2>
+            <form id="loginForm">
+                <div class="mb-4">
+                    <label class="block text-gray-700 text-sm font-bold mb-2" for="loginEmail">
+                        Email
+                    </label>
+                    <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="loginEmail" type="email" placeholder="Email" required>
+                </div>
+                <div class="mb-6">
+                    <label class="block text-gray-700 text-sm font-bold mb-2" for="loginPassword">
+                        Senha
+                    </label>
+                    <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 mb-3 leading-tight focus:outline-none focus:shadow-outline" id="loginPassword" type="password" placeholder="******************" required>
+                </div>
+                <div class="flex items-center justify-between">
+                    <button class="gradient-bg text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline w-full" type="submit">
+                        Entrar
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Main App (hidden until login) -->
+    <div id="app" class="hidden">
+        <!-- Mobile Menu Button -->
+        <div class="md:hidden fixed top-4 left-4 z-40">
+            <button id="menuToggle" class="p-2 rounded-md bg-blue-600 text-white">
+                <i class="fas fa-bars"></i>
+            </button>
+        </div>
+
+        <!-- Sidebar -->
+        <div id="sidebar" class="sidebar bg-white w-64 h-screen fixed shadow-lg">
+            <div class="p-4 border-b border-gray-200">
+                <h1 class="text-xl font-bold text-gray-800">Sistema de Chamados</h1>
+                <p class="text-sm text-gray-600" id="userRoleDisplay">Usuário</p>
+            </div>
+            <nav class="p-4">
+                <ul>
+                    <li class="mb-2">
+                        <a href="#" class="flex items-center p-2 text-gray-700 rounded-lg hover:bg-blue-50" id="dashboardLink">
+                            <i class="fas fa-tachometer-alt mr-3"></i>
+                            <span>Dashboard</span>
+                        </a>
+                    </li>
+                    <li class="mb-2">
+                        <a href="#" class="flex items-center p-2 text-gray-700 rounded-lg hover:bg-blue-50" id="ticketsLink">
+                            <i class="fas fa-ticket-alt mr-3"></i>
+                            <span>Meus Chamados</span>
+                        </a>
+                    </li>
+                    <li class="mb-2">
+                        <a href="#" class="flex items-center p-2 text-gray-700 rounded-lg hover:bg-blue-50" id="newTicketLink">
+                            <i class="fas fa-plus-circle mr-3"></i>
+                            <span>Novo Chamado</span>
+                        </a>
+                    </li>
+                    <li class="mb-2 hidden" id="adminUsersLink">
+                        <a href="#" class="flex items-center p-2 text-gray-700 rounded-lg hover:bg-blue-50">
+                            <i class="fas fa-users-cog mr-3"></i>
+                            <span>Gerenciar Usuários</span>
+                        </a>
+                    </li>
+                    <li class="mb-2 hidden" id="adminTicketsLink">
+                        <a href="#" class="flex items-center p-2 text-gray-700 rounded-lg hover:bg-blue-50">
+                            <i class="fas fa-clipboard-list mr-3"></i>
+                            <span>Todos os Chamados</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+            <div class="absolute bottom-0 w-full p-4 border-t border-gray-200">
+                <button id="logoutBtn" class="flex items-center p-2 text-red-600 rounded-lg hover:bg-red-50 w-full">
+                    <i class="fas fa-sign-out-alt mr-3"></i>
+                    <span>Sair</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="md:ml-64 min-h-screen">
+            <!-- Header -->
+            <header class="bg-white shadow-sm">
+                <div class="max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8 flex justify-between items-center">
+                    <h1 class="text-lg font-semibold text-gray-900" id="pageTitle">Dashboard</h1>
+                    <div class="flex items-center space-x-4">
+                        <span class="text-sm text-gray-600" id="userEmailDisplay">user@example.com</span>
+                        <div class="relative">
+                            <button id="userMenuButton" class="flex items-center space-x-2 focus:outline-none">
+                                <div class="w-8 h-8 rounded-full gradient-bg flex items-center justify-center text-white font-bold">
+                                    <span id="userInitials">U</span>
+                                </div>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Dashboard Content -->
+            <main class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+                <!-- Dashboard View -->
+                <div id="dashboardView">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                        <div class="bg-white shadow rounded-lg p-6">
+                            <div class="flex items-center">
+                                <div class="p-3 rounded-full bg-blue-100 text-blue-600 mr-4">
+                                    <i class="fas fa-ticket-alt"></i>
+                                </div>
+                                <div>
+                                    <p class="text-sm font-medium text-gray-500">Chamados Abertos</p>
+                                    <p class="text-2xl font-semibold text-gray-800" id="openTicketsCount">0</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="bg-white shadow rounded-lg p-6">
+                            <div class="flex items-center">
+                                <div class="p-3 rounded-full bg-yellow-100 text-yellow-600 mr-4">
+                                    <i class="fas fa-clock"></i>
+                                </div>
+                                <div>
+                                    <p class="text-sm font-medium text-gray-500">Em Andamento</p>
+                                    <p class="text-2xl font-semibold text-gray-800" id="inProgressTicketsCount">0</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="bg-white shadow rounded-lg p-6">
+                            <div class="flex items-center">
+                                <div class="p-3 rounded-full bg-green-100 text-green-600 mr-4">
+                                    <i class="fas fa-check-circle"></i>
+                                </div>
+                                <div>
+                                    <p class="text-sm font-medium text-gray-500">Resolvidos</p>
+                                    <p class="text-2xl font-semibold text-gray-800" id="resolvedTicketsCount">0</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white shadow rounded-lg p-6 mb-6">
+                        <div class="flex justify-between items-center mb-4">
+                            <h2 class="text-lg font-semibold text-gray-800">Últimos Chamados</h2>
+                            <a href="#" class="text-sm text-blue-600 hover:underline" id="viewAllTickets">Ver todos</a>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="min-w-full divide-y divide-gray-200">
+                                <thead class="bg-gray-50">
+                                    <tr>
+                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
+                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Título</th>
+                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Data</th>
+                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ações</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="bg-white divide-y divide-gray-200" id="recentTicketsTable">
+                                    <!-- Tickets will be loaded here -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- My Tickets View -->
+                <div id="myTicketsView" class="hidden">
+                    <div class="flex justify-between items-center mb-6">
+                        <h2 class="text-2xl font-semibold text-gray-800">Meus Chamados</h2>
+                        <button id="createNewTicketBtn" class="gradient-bg text-white px-4 py-2 rounded-md flex items-center">
+                            <i class="fas fa-plus mr-2"></i> Novo Chamado
+                        </button>
+                    </div>
+                    <div class="bg-white shadow rounded-lg overflow-hidden">
+                        <div class="p-4 border-b border-gray-200">
+                            <div class="flex flex-wrap items-center justify-between">
+                                <div class="flex items-center space-x-4 mb-4 md:mb-0">
+                                    <div class="relative">
+                                        <select id="ticketFilter" class="block appearance-none bg-gray-100 border border-gray-200 text-gray-700 py-2 px-4 pr-8 rounded leading-tight focus:outline-none focus:bg-white focus:border-gray-500">
+                                            <option value="all">Todos</option>
+                                            <option value="open">Abertos</option>
+                                            <option value="in_progress">Em Andamento</option>
+                                            <option value="resolved">Resolvidos</option>
+                                        </select>
+                                        <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+                                            <i class="fas fa-chevron-down"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="relative w-full md:w-auto">
+                                    <input type="text" id="ticketSearch" placeholder="Buscar chamados..." class="bg-gray-100 border border-gray-200 text-gray-700 py-2 px-4 pr-8 rounded w-full focus:outline-none focus:bg-white focus:border-gray-500">
+                                    <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                                        <i class="fas fa-search text-gray-400"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="divide-y divide-gray-200" id="myTicketsList">
+                            <!-- Tickets will be loaded here -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- New Ticket View -->
+                <div id="newTicketView" class="hidden">
+                    <div class="flex justify-between items-center mb-6">
+                        <h2 class="text-2xl font-semibold text-gray-800">Novo Chamado</h2>
+                        <button id="backToTicketsBtn" class="bg-gray-200 text-gray-700 px-4 py-2 rounded-md flex items-center">
+                            <i class="fas fa-arrow-left mr-2"></i> Voltar
+                        </button>
+                    </div>
+                    <div class="bg-white shadow rounded-lg p-6">
+                        <form id="newTicketForm">
+                            <div class="mb-6">
+                                <label for="ticketTitle" class="block text-sm font-medium text-gray-700 mb-2">Título</label>
+                                <input type="text" id="ticketTitle" class="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md p-2 border" placeholder="Descreva o problema resumidamente" required>
+                            </div>
+                            <div class="mb-6">
+                                <label for="ticketDescription" class="block text-sm font-medium text-gray-700 mb-2">Descrição</label>
+                                <textarea id="ticketDescription" rows="5" class="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md p-2 border" placeholder="Descreva o problema em detalhes..." required></textarea>
+                            </div>
+                            <div class="mb-6">
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Anexos</label>
+                                <div class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md">
+                                    <div class="space-y-1 text-center">
+                                        <div class="flex text-sm text-gray-600">
+                                            <label for="file-upload" class="relative cursor-pointer bg-white rounded-md font-medium text-blue-600 hover:text-blue-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-blue-500">
+                                                <span>Enviar arquivos</span>
+                                                <input id="file-upload" name="file-upload" type="file" class="sr-only" multiple>
+                                            </label>
+                                            <p class="pl-1">ou arraste e solte</p>
+                                        </div>
+                                        <p class="text-xs text-gray-500">PNG, JPG, PDF até 10MB</p>
+                                    </div>
+                                </div>
+                                <div id="filePreviews" class="mt-4 flex flex-wrap">
+                                    <!-- File previews will appear here -->
+                                </div>
+                            </div>
+                            <div class="flex justify-end">
+                                <button type="submit" class="gradient-bg text-white px-6 py-2 rounded-md flex items-center">
+                                    <i class="fas fa-paper-plane mr-2"></i> Enviar Chamado
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Ticket Detail View -->
+                <div id="ticketDetailView" class="hidden">
+                    <div class="flex justify-between items-center mb-6">
+                        <h2 class="text-2xl font-semibold text-gray-800">Detalhes do Chamado</h2>
+                        <button id="backFromDetailBtn" class="bg-gray-200 text-gray-700 px-4 py-2 rounded-md flex items-center">
+                            <i class="fas fa-arrow-left mr-2"></i> Voltar
+                        </button>
+                    </div>
+                    <div class="bg-white shadow rounded-lg overflow-hidden">
+                        <div class="p-6 border-b border-gray-200">
+                            <div class="flex justify-between items-start">
+                                <div>
+                                    <h3 class="text-lg font-bold text-gray-800" id="detailTicketTitle">Título do Chamado</h3>
+                                    <div class="flex items-center mt-2">
+                                        <span class="px-2 py-1 text-xs rounded-full bg-blue-100 text-blue-800" id="detailTicketStatus">Aberto</span>
+                                        <span class="ml-3 text-sm text-gray-500" id="detailTicketId">#12345</span>
+                                        <span class="ml-3 text-sm text-gray-500" id="detailTicketDate">10/06/2023</span>
+                                    </div>
+                                </div>
+                                <div class="hidden" id="adminTicketActions">
+                                    <div class="flex space-x-2">
+                                        <button id="assignToMeBtn" class="bg-blue-100 text-blue-700 px-3 py-1 rounded-md text-sm flex items-center">
+                                            <i class="fas fa-user-plus mr-1"></i> Assumir
+                                        </button>
+                                        <div class="relative">
+                                            <button id="assignDropdownBtn" class="bg-gray-100 text-gray-700 px-3 py-1 rounded-md text-sm flex items-center">
+                                                <i class="fas fa-users mr-1"></i> Designar
+                                                <i class="fas fa-chevron-down ml-1"></i>
+                                            </button>
+                                            <div id="assignDropdown" class="hidden absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg z-10">
+                                                <div class="py-1" id="adminUsersList">
+                                                    <!-- Admin users will be listed here -->
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <button id="resolveTicketBtn" class="bg-green-100 text-green-700 px-3 py-1 rounded-md text-sm flex items-center">
+                                            <i class="fas fa-check mr-1"></i> Resolver
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="p-6">
+                            <div class="mb-6">
+                                <h4 class="text-sm font-medium text-gray-500 mb-2">Descrição</h4>
+                                <p class="text-gray-700" id="detailTicketDescription">Descrição detalhada do problema.</p>
+                            </div>
+                            <div class="mb-6">
+                                <h4 class="text-sm font-medium text-gray-500 mb-2">Anexos</h4>
+                                <div class="flex flex-wrap" id="detailTicketAttachments">
+                                    <!-- Attachments will be listed here -->
+                                </div>
+                            </div>
+                            <div>
+                                <h4 class="text-sm font-medium text-gray-500 mb-2">Histórico</h4>
+                                <div class="space-y-4" id="ticketHistory">
+                                    <!-- History items will be listed here -->
+                                </div>
+                            </div>
+                        </div>
+                        <div class="p-6 border-t border-gray-200">
+                            <h4 class="text-sm font-medium text-gray-500 mb-2">Adicionar Comentário</h4>
+                            <form id="addCommentForm">
+                                <textarea id="commentText" rows="3" class="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md p-2 border mb-3" placeholder="Digite seu comentário..."></textarea>
+                                <div class="flex justify-end">
+                                    <button type="submit" class="gradient-bg text-white px-4 py-2 rounded-md flex items-center">
+                                        <i class="fas fa-comment mr-2"></i> Enviar Comentário
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Admin Users View -->
+                <div id="adminUsersView" class="hidden">
+                    <div class="flex justify-between items-center mb-6">
+                        <h2 class="text-2xl font-semibold text-gray-800">Gerenciar Usuários</h2>
+                        <button id="addNewUserBtn" class="gradient-bg text-white px-4 py-2 rounded-md flex items-center">
+                            <i class="fas fa-user-plus mr-2"></i> Novo Usuário
+                        </button>
+                    </div>
+                    <div class="bg-white shadow rounded-lg overflow-hidden">
+                        <div class="p-4 border-b border-gray-200">
+                            <div class="relative w-full md:w-64">
+                                <input type="text" id="userSearch" placeholder="Buscar usuários..." class="bg-gray-100 border border-gray-200 text-gray-700 py-2 px-4 pr-8 rounded w-full focus:outline-none focus:bg-white focus:border-gray-500">
+                                <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                                    <i class="fas fa-search text-gray-400"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="min-w-full divide-y divide-gray-200">
+                                <thead class="bg-gray-50">
+                                    <tr>
+                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nome</th>
+                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
+                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tipo</th>
+                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ações</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="bg-white divide-y divide-gray-200" id="adminUsersTable">
+                                    <!-- Users will be loaded here -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Add User Modal -->
+                <div id="addUserModal" class="hidden fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+                    <div class="bg-white rounded-lg shadow-xl p-8 w-full max-w-md">
+                        <h2 class="text-2xl font-bold text-center mb-6 text-gray-800">Adicionar Usuário</h2>
+                        <form id="addUserForm">
+                            <div class="mb-4">
+                                <label class="block text-gray-700 text-sm font-bold mb-2" for="userName">
+                                    Nome
+                                </label>
+                                <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="userName" type="text" placeholder="Nome completo" required>
+                            </div>
+                            <div class="mb-4">
+                                <label class="block text-gray-700 text-sm font-bold mb-2" for="userEmail">
+                                    Email
+                                </label>
+                                <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="userEmail" type="email" placeholder="Email" required>
+                            </div>
+                            <div class="mb-4">
+                                <label class="block text-gray-700 text-sm font-bold mb-2" for="userType">
+                                    Tipo de Usuário
+                                </label>
+                                <select class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="userType" required>
+                                    <option value="user">Usuário Normal</option>
+                                    <option value="admin">Administrador</option>
+                                </select>
+                            </div>
+                            <div class="mb-6">
+                                <label class="block text-gray-700 text-sm font-bold mb-2" for="userPassword">
+                                    Senha Temporária
+                                </label>
+                                <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 mb-3 leading-tight focus:outline-none focus:shadow-outline" id="userPassword" type="password" placeholder="******************" required>
+                                <p class="text-xs text-gray-600">O usuário deverá alterar a senha no primeiro login.</p>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <button type="button" id="cancelAddUser" class="bg-gray-300 text-gray-700 font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">
+                                    Cancelar
+                                </button>
+                                <button type="submit" class="gradient-bg text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">
+                                    Criar Usuário
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Admin Tickets View -->
+                <div id="adminTicketsView" class="hidden">
+                    <div class="flex justify-between items-center mb-6">
+                        <h2 class="text-2xl font-semibold text-gray-800">Todos os Chamados</h2>
+                        <div class="flex items-center space-x-4">
+                            <div class="relative">
+                                <select id="adminTicketFilter" class="block appearance-none bg-gray-100 border border-gray-200 text-gray-700 py-2 px-4 pr-8 rounded leading-tight focus:outline-none focus:bg-white focus:border-gray-500">
+                                    <option value="all">Todos</option>
+                                    <option value="open">Abertos</option>
+                                    <option value="in_progress">Em Andamento</option>
+                                    <option value="resolved">Resolvidos</option>
+                                </select>
+                                <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+                                    <i class="fas fa-chevron-down"></i>
+                                </div>
+                            </div>
+                            <div class="relative">
+                                <select id="adminAssignedFilter" class="block appearance-none bg-gray-100 border border-gray-200 text-gray-700 py-2 px-4 pr-8 rounded leading-tight focus:outline-none focus:bg-white focus:border-gray-500">
+                                    <option value="all">Todos</option>
+                                    <option value="me">Atribuídos a mim</option>
+                                    <option value="others">Atribuídos a outros</option>
+                                    <option value="unassigned">Não atribuídos</option>
+                                </select>
+                                <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+                                    <i class="fas fa-chevron-down"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-white shadow rounded-lg overflow-hidden">
+                        <div class="p-4 border-b border-gray-200">
+                            <div class="relative w-full md:w-64">
+                                <input type="text" id="adminTicketSearch" placeholder="Buscar chamados..." class="bg-gray-100 border border-gray-200 text-gray-700 py-2 px-4 pr-8 rounded w-full focus:outline-none focus:bg-white focus:border-gray-500">
+                                <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                                    <i class="fas fa-search text-gray-400"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="min-w-full divide-y divide-gray-200">
+                                <thead class="bg-gray-50">
+                                    <tr>
+                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
+                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Título</th>
+                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Criado por</th>
+                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Atribuído a</th>
+                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Data</th>
+                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ações</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="bg-white divide-y divide-gray-200" id="adminTicketsTable">
+                                    <!-- Tickets will be loaded here -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script>
+        // Sample data for demonstration
+        let users = [
+            { id: 1, name: "Admin User", email: "admin@example.com", password: "admin123", role: "admin", active: true },
+            { id: 2, name: "Regular User", email: "user@example.com", password: "user123", role: "user", active: true },
+            { id: 3, name: "Tech Support", email: "tech@example.com", password: "tech123", role: "admin", active: true }
+        ];
+
+        let tickets = [
+            {
+                id: 1,
+                title: "Problema com impressora",
+                description: "A impressora não está respondendo quando tento imprimir documentos.",
+                status: "open",
+                createdBy: 2,
+                assignedTo: null,
+                createdAt: new Date(2023, 5, 10),
+                files: [],
+                comments: []
+            },
+            {
+                id: 2,
+                title: "Acesso negado ao sistema",
+                description: "Estou recebendo mensagem de acesso negado quando tento acessar o sistema financeiro.",
+                status: "in_progress",
+                createdBy: 2,
+                assignedTo: 3,
+                createdAt: new Date(2023, 5, 8),
+                files: ["document.pdf"],
+                comments: [
+                    { userId: 3, text: "Estou verificando o problema com as permissões.", createdAt: new Date(2023, 5, 8, 10, 30) }
+                ]
+            },
+            {
+                id: 3,
+                title: "E-mail não está sendo recebido",
+                description: "Clientes estão reclamando que não estão recebendo nossos e-mails.",
+                status: "resolved",
+                createdBy: 2,
+                assignedTo: 1,
+                createdAt: new Date(2023, 5, 5),
+                files: ["email-error.png"],
+                comments: [
+                    { userId: 1, text: "Verifiquei e era um problema com o servidor de e-mails.", createdAt: new Date(2023, 5, 5, 14, 20) },
+                    { userId: 1, text: "Problema resolvido. Todos os e-mails foram enviados.", createdAt: new Date(2023, 5, 6, 9, 15) }
+                ]
+            }
+        ];
+
+        // Current user
+        let currentUser = null;
+        let selectedFiles = [];
+
+        // DOM Elements
+        const loginModal = document.getElementById('loginModal');
+        const app = document.getElementById('app');
+        const loginForm = document.getElementById('loginForm');
+        const logoutBtn = document.getElementById('logoutBtn');
+        const menuToggle = document.getElementById('menuToggle');
+        const sidebar = document.getElementById('sidebar');
+        const userRoleDisplay = document.getElementById('userRoleDisplay');
+        const userEmailDisplay = document.getElementById('userEmailDisplay');
+        const userInitials = document.getElementById('userInitials');
+        const adminUsersLink = document.getElementById('adminUsersLink');
+        const adminTicketsLink = document.getElementById('adminTicketsLink');
+
+        // Views
+        const dashboardView = document.getElementById('dashboardView');
+        const myTicketsView = document.getElementById('myTicketsView');
+        const newTicketView = document.getElementById('newTicketView');
+        const ticketDetailView = document.getElementById('ticketDetailView');
+        const adminUsersView = document.getElementById('adminUsersView');
+        const adminTicketsView = document.getElementById('adminTicketsView');
+
+        // Navigation links
+        const dashboardLink = document.getElementById('dashboardLink');
+        const ticketsLink = document.getElementById('ticketsLink');
+        const newTicketLink = document.getElementById('newTicketLink');
+        const viewAllTickets = document.getElementById('viewAllTickets');
+        const createNewTicketBtn = document.getElementById('createNewTicketBtn');
+        const backToTicketsBtn = document.getElementById('backToTicketsBtn');
+        const backFromDetailBtn = document.getElementById('backFromDetailBtn');
+        const addNewUserBtn = document.getElementById('addNewUserBtn');
+
+        // Page titles
+        const pageTitle = document.getElementById('pageTitle');
+
+        // Ticket form
+        const newTicketForm = document.getElementById('newTicketForm');
+        const fileUpload = document.getElementById('file-upload');
+        const filePreviews = document.getElementById('filePreviews');
+
+        // Ticket detail
+        const detailTicketTitle = document.getElementById('detailTicketTitle');
+        const detailTicketStatus = document.getElementById('detailTicketStatus');
+        const detailTicketId = document.getElementById('detailTicketId');
+        const detailTicketDate = document.getElementById('detailTicketDate');
+        const detailTicketDescription = document.getElementById('detailTicketDescription');
+        const detailTicketAttachments = document.getElementById('detailTicketAttachments');
+        const ticketHistory = document.getElementById('ticketHistory');
+        const addCommentForm = document.getElementById('addCommentForm');
+        const commentText = document.getElementById('commentText');
+        const adminTicketActions = document.getElementById('adminTicketActions');
+        const assignToMeBtn = document.getElementById('assignToMeBtn');
+        const assignDropdownBtn = document.getElementById('assignDropdownBtn');
+        const assignDropdown = document.getElementById('assignDropdown');
+        const adminUsersList = document.getElementById('adminUsersList');
+        const resolveTicketBtn = document.getElementById('resolveTicketBtn');
+
+        // Admin users
+        const addUserModal = document.getElementById('addUserModal');
+        const addUserForm = document.getElementById('addUserForm');
+        const cancelAddUser = document.getElementById('cancelAddUser');
+        const adminUsersTable = document.getElementById('adminUsersTable');
+
+        // Admin tickets
+        const adminTicketsTable = document.getElementById('adminTicketsTable');
+
+        // Initialize the app
+        document.addEventListener('DOMContentLoaded', () => {
+            // Show login modal by default
+            loginModal.classList.remove('hidden');
+
+            // Set up event listeners
+            setupEventListeners();
+        });
+
+        function setupEventListeners() {
+            // Login form
+            loginForm.addEventListener('submit', handleLogin);
+
+            // Logout button
+            logoutBtn.addEventListener('click', handleLogout);
+
+            // Menu toggle for mobile
+            menuToggle.addEventListener('click', () => {
+                sidebar.classList.toggle('open');
+            });
+
+            // Navigation links
+            dashboardLink.addEventListener('click', (e) => {
+                e.preventDefault();
+                showDashboard();
+            });
+
+            ticketsLink.addEventListener('click', (e) => {
+                e.preventDefault();
+                showMyTickets();
+            });
+
+            newTicketLink.addEventListener('click', (e) => {
+                e.preventDefault();
+                showNewTicketForm();
+            });
+
+            viewAllTickets.addEventListener('click', (e) => {
+                e.preventDefault();
+                showMyTickets();
+            });
+
+            createNewTicketBtn.addEventListener('click', showNewTicketForm);
+            backToTicketsBtn.addEventListener('click', showMyTickets);
+            backFromDetailBtn.addEventListener('click', () => {
+                if (currentUser.role === 'admin' && adminTicketsView.classList.contains('hidden')) {
+                    showAdminTickets();
+                } else {
+                    showMyTickets();
+                }
+            });
+
+            // Ticket form
+            newTicketForm.addEventListener('submit', handleNewTicketSubmit);
+            fileUpload.addEventListener('change', handleFileUpload);
+
+            // Ticket detail
+            addCommentForm.addEventListener('submit', handleAddComment);
+            assignToMeBtn.addEventListener('click', handleAssignToMe);
+            assignDropdownBtn.addEventListener('click', () => {
+                assignDropdown.classList.toggle('hidden');
+            });
+            resolveTicketBtn.addEventListener('click', handleResolveTicket);
+
+            // Admin users
+            addNewUserBtn.addEventListener('click', () => {
+                addUserModal.classList.remove('hidden');
+            });
+
+            cancelAddUser.addEventListener('click', () => {
+                addUserModal.classList.add('hidden');
+            });
+
+            addUserForm.addEventListener('submit', handleAddUser);
+
+            // Admin tickets
+            document.getElementById('adminUsersLink').addEventListener('click', (e) => {
+                e.preventDefault();
+                showAdminUsers();
+            });
+
+            document.getElementById('adminTicketsLink').addEventListener('click', (e) => {
+                e.preventDefault();
+                showAdminTickets();
+            });
+        }
+
+        function handleLogin(e) {
+            e.preventDefault();
+
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+
+            // Find user
+            const user = users.find(u => u.email === email && u.password === password);
+
+            if (user) {
+                currentUser = user;
+                loginModal.classList.add('hidden');
+                app.classList.remove('hidden');
+                updateUIForUser();
+                showDashboard();
+            } else {
+                alert('Email ou senha incorretos');
+            }
+        }
+
+        function handleLogout() {
+            currentUser = null;
+            app.classList.add('hidden');
+            loginModal.classList.remove('hidden');
+            // Clear form
+            loginForm.reset();
+        }
+
+        function updateUIForUser() {
+            // Update user info
+            userRoleDisplay.textContent = currentUser.role === 'admin' ? 'Administrador' : 'Usuário';
+            userEmailDisplay.textContent = currentUser.email;
+            userInitials.textContent = currentUser.name.charAt(0).toUpperCase();
+
+            // Show/hide admin links
+            if (currentUser.role === 'admin') {
+                adminUsersLink.classList.remove('hidden');
+                adminTicketsLink.classList.remove('hidden');
+            } else {
+                adminUsersLink.classList.add('hidden');
+                adminTicketsLink.classList.add('hidden');
+            }
+        }
+
+        function showDashboard() {
+            hideAllViews();
+            dashboardView.classList.remove('hidden');
+            pageTitle.textContent = 'Dashboard';
+
+            // Update counts
+            const openCount = tickets.filter(t => t.status === 'open').length;
+            const inProgressCount = tickets.filter(t => t.status === 'in_progress').length;
+            const resolvedCount = tickets.filter(t => t.status === 'resolved').length;
+
+            document.getElementById('openTicketsCount').textContent = openCount;
+            document.getElementById('inProgressTicketsCount').textContent = inProgressCount;
+            document.getElementById('resolvedTicketsCount').textContent = resolvedCount;
+
+            // Show recent tickets
+            const recentTicketsTable = document.getElementById('recentTicketsTable');
+            recentTicketsTable.innerHTML = '';
+
+            // Get user's tickets or all tickets if admin
+            let userTickets = currentUser.role === 'admin'
+                ? [...tickets].sort((a, b) => b.createdAt - a.createdAt).slice(0, 5)
+                : tickets.filter(t => t.createdBy === currentUser.id)
+                    .sort((a, b) => b.createdAt - a.createdAt)
+                    .slice(0, 5);
+
+            userTickets.forEach(ticket => {
+                const createdByUser = users.find(u => u.id === ticket.createdBy);
+                const assignedToUser = ticket.assignedTo ? users.find(u => u.id === ticket.assignedTo) : null;
+
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">#${ticket.id}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${ticket.title}</td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <span class="px-2 py-1 text-xs rounded-full ${getStatusClass(ticket.status)}">
+                            ${getStatusText(ticket.status)}
+                        </span>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        ${formatDate(ticket.createdAt)}
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                        <a href="#" class="text-blue-600 hover:text-blue-900 view-ticket" data-id="${ticket.id}">Ver</a>
+                    </td>
+                `;
+                recentTicketsTable.appendChild(row);
+            });
+
+            // Add event listeners to view buttons
+            document.querySelectorAll('.view-ticket').forEach(button => {
+                button.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const ticketId = parseInt(button.getAttribute('data-id'));
+                    showTicketDetail(ticketId);
+                });
+            });
+        }
+
+        function showMyTickets() {
+            hideAllViews();
+            myTicketsView.classList.remove('hidden');
+            pageTitle.textContent = 'Meus Chamados';
+
+            // Filter tickets for current user
+            const userTickets = tickets.filter(t => t.createdBy === currentUser.id);
+            renderTicketList(userTickets, 'myTicketsList');
+
+            // Set up filter
+            document.getElementById('ticketFilter').addEventListener('change', (e) => {
+                let filteredTickets = [...userTickets];
+
+                if (e.target.value !== 'all') {
+                    filteredTickets = userTickets.filter(t => t.status === e.target.value);
+                }
+
+                renderTicketList(filteredTickets, 'myTicketsList');
+            });
+
+            // Set up search
+            document.getElementById('ticketSearch').addEventListener('input', (e) => {
+                const searchTerm = e.target.value.toLowerCase();
+                let filteredTickets = [...userTickets];
+
+                if (searchTerm) {
+                    filteredTickets = userTickets.filter(t =>
+                        t.title.toLowerCase().includes(searchTerm) ||
+                        t.description.toLowerCase().includes(searchTerm)
+                    );
+                }
+
+                renderTicketList(filteredTickets, 'myTicketsList');
+            });
+        }
+
+        function showNewTicketForm() {
+            hideAllViews();
+            newTicketView.classList.remove('hidden');
+            pageTitle.textContent = 'Novo Chamado';
+
+            // Reset form
+            newTicketForm.reset();
+            filePreviews.innerHTML = '';
+            selectedFiles = [];
+        }
+
+        function showTicketDetail(ticketId) {
+            hideAllViews();
+            ticketDetailView.classList.remove('hidden');
+            pageTitle.textContent = 'Detalhes do Chamado';
+
+            const ticket = tickets.find(t => t.id === ticketId);
+            const createdByUser = users.find(u => u.id === ticket.createdBy);
+            const assignedToUser = ticket.assignedTo ? users.find(u => u.id === ticket.assignedTo) : null;
+
+            // Update ticket info
+            detailTicketTitle.textContent = ticket.title;
+            detailTicketStatus.textContent = getStatusText(ticket.status);
+            detailTicketStatus.className = `px-2 py-1 text-xs rounded-full ${getStatusClass(ticket.status)}`;
+            detailTicketId.textContent = `#${ticket.id}`;
+            detailTicketDate.textContent = formatDate(ticket.createdAt);
+            detailTicketDescription.textContent = ticket.description;
+
+            // Show/hide admin actions
+            if (currentUser.role === 'admin') {
+                adminTicketActions.classList.remove('hidden');
+            } else {
+                adminTicketActions.classList.add('hidden');
+            }
+
+            // Render attachments
+            detailTicketAttachments.innerHTML = '';
+            if (ticket.files && ticket.files.length > 0) {
+                ticket.files.forEach(file => {
+                    const fileExt = file.split('.').pop().toLowerCase();
+                    let iconClass = 'fa-file';
+
+                    if (['jpg', 'jpeg', 'png', 'gif'].includes(fileExt)) {
+                        iconClass = 'fa-file-image';
+                    } else if (['pdf'].includes(fileExt)) {
+                        iconClass = 'fa-file-pdf';
+                    } else if (['doc', 'docx'].includes(fileExt)) {
+                        iconClass = 'fa-file-word';
+                    } else if (['xls', 'xlsx'].includes(fileExt)) {
+                        iconClass = 'fa-file-excel';
+                    }
+
+                    const fileElement = document.createElement('div');
+                    fileElement.className = 'flex items-center p-2 bg-gray-100 rounded-md mr-2 mb-2';
+                    fileElement.innerHTML = `
+                        <i class="fas ${iconClass} mr-2 text-gray-600"></i>
+                        <span class="text-sm">${file}</span>
+                        <a href="#" class="ml-2 text-blue-600 hover:text-blue-800 download-file" data-file="${file}">
+                            <i class="fas fa-download"></i>
+                        </a>
+                    `;
+                    detailTicketAttachments.appendChild(fileElement);
+                });
+            } else {
+                detailTicketAttachments.innerHTML = '<p class="text-gray-500">Nenhum anexo</p>';
+            }
+
+            // Render comments/history
+            ticketHistory.innerHTML = '';
+
+            // Add creation event
+            const creationEvent = document.createElement('div');
+            creationEvent.className = 'flex items-start';
+            creationEvent.innerHTML = `
+                <div class="flex-shrink-0 mr-3">
+                    <div class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-600">
+                        <i class="fas fa-ticket-alt"></i>
+                    </div>
+                </div>
+                <div class="flex-1 min-w-0">
+                    <div class="text-sm font-medium text-gray-900">${createdByUser.name}</div>
+                    <div class="text-sm text-gray-500">Criou o chamado</div>
+                    <div class="mt-1 text-sm text-gray-500">${formatDateTime(ticket.createdAt)}</div>
+                </div>
+            `;
+            ticketHistory.appendChild(creationEvent);
+
+            // Add assignment event if assigned
+            if (ticket.assignedTo) {
+                const assignmentEvent = document.createElement('div');
+                assignmentEvent.className = 'flex items-start mt-4';
+                assignmentEvent.innerHTML = `
+                    <div class="flex-shrink-0 mr-3">
+                        <div class="w-8 h-8 rounded-full bg-purple-100 flex items-center justify-center text-purple-600">
+                            <i class="fas fa-user-plus"></i>
+                        </div>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <div class="text-sm font-medium text-gray-900">Chamado atribuído</div>
+                        <div class="text-sm text-gray-500">Atribuído para ${assignedToUser.name}</div>
+                    </div>
+                `;
+                ticketHistory.appendChild(assignmentEvent);
+            }
+
+            // Add status changes
+            if (ticket.status === 'in_progress') {
+                const progressEvent = document.createElement('div');
+                progressEvent.className = 'flex items-start mt-4';
+                progressEvent.innerHTML = `
+                    <div class="flex-shrink-0 mr-3">
+                        <div class="w-8 h-8 rounded-full bg-yellow-100 flex items-center justify-center text-yellow-600">
+                            <i class="fas fa-spinner"></i>
+                        </div>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <div class="text-sm font-medium text-gray-900">Status alterado</div>
+                        <div class="text-sm text-gray-500">Chamado em andamento</div>
+                    </div>
+                `;
+                ticketHistory.appendChild(progressEvent);
+            } else if (ticket.status === 'resolved') {
+                const resolvedEvent = document.createElement('div');
+                resolvedEvent.className = 'flex items-start mt-4';
+                resolvedEvent.innerHTML = `
+                    <div class="flex-shrink-0 mr-3">
+                        <div class="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center text-green-600">
+                            <i class="fas fa-check"></i>
+                        </div>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <div class="text-sm font-medium text-gray-900">Status alterado</div>
+                        <div class="text-sm text-gray-500">Chamado resolvido</div>
+                    </div>
+                `;
+                ticketHistory.appendChild(resolvedEvent);
+            }
+
+            // Add comments
+            if (ticket.comments && ticket.comments.length > 0) {
+                ticket.comments.forEach(comment => {
+                    const commentUser = users.find(u => u.id === comment.userId);
+                    const commentEvent = document.createElement('div');
+                    commentEvent.className = 'flex items-start mt-4';
+                    commentEvent.innerHTML = `
+                        <div class="flex-shrink-0 mr-3">
+                            <div class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-600">
+                                ${commentUser.name.charAt(0).toUpperCase()}
+                            </div>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <div class="text-sm font-medium text-gray-900">${commentUser.name}</div>
+                            <div class="text-sm text-gray-700 mt-1">${comment.text}</div>
+                            <div class="mt-1 text-sm text-gray-500">${formatDateTime(comment.createdAt)}</div>
+                        </div>
+                    `;
+                    ticketHistory.appendChild(commentEvent);
+                });
+            }
+
+            // Populate admin users list for assignment
+            if (currentUser.role === 'admin') {
+                adminUsersList.innerHTML = '';
+                const adminUsers = users.filter(u => u.role === 'admin' && u.id !== currentUser.id);
+
+                adminUsers.forEach(user => {
+                    const userItem = document.createElement('a');
+                    userItem.href = '#';
+                    userItem.className = 'block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100';
+                    userItem.textContent = user.name;
+                    userItem.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        assignTicketToUser(ticketId, user.id);
+                        assignDropdown.classList.add('hidden');
+                    });
+                    adminUsersList.appendChild(userItem);
+                });
+            }
+
+            // Set current ticket ID on action buttons
+            assignToMeBtn.setAttribute('data-ticket-id', ticketId);
+            resolveTicketBtn.setAttribute('data-ticket-id', ticketId);
+        }
+
+        function showAdminUsers() {
+            hideAllViews();
+            adminUsersView.classList.remove('hidden');
+            pageTitle.textContent = 'Gerenciar Usuários';
+
+            // Render users table
+            renderAdminUsersTable();
+
+            // Set up search
+            document.getElementById('userSearch').addEventListener('input', (e) => {
+                const searchTerm = e.target.value.toLowerCase();
+                let filteredUsers = [...users];
+
+                if (searchTerm) {
+                    filteredUsers = users.filter(u =>
+                        u.name.toLowerCase().includes(searchTerm) ||
+                        u.email.toLowerCase().includes(searchTerm)
+                    );
+                }
+
+                renderAdminUsersTable(filteredUsers);
+            });
+        }
+
+        function showAdminTickets() {
+            hideAllViews();
+            adminTicketsView.classList.remove('hidden');
+            pageTitle.textContent = 'Todos os Chamados';
+
+            // Render tickets table
+            renderAdminTicketsTable();
+
+            // Set up filters
+            document.getElementById('adminTicketFilter').addEventListener('change', (e) => {
+                renderAdminTicketsTable();
+            });
+
+            document.getElementById('adminAssignedFilter').addEventListener('change', (e) => {
+                renderAdminTicketsTable();
+            });
+
+            // Set up search
+            document.getElementById('adminTicketSearch').addEventListener('input', (e) => {
+                const searchTerm = e.target.value.toLowerCase();
+                let filteredTickets = [...tickets];
+
+                if (searchTerm) {
+                    filteredTickets = tickets.filter(t =>
+                        t.title.toLowerCase().includes(searchTerm) ||
+                        t.description.toLowerCase().includes(searchTerm)
+                    );
+                }
+
+                renderAdminTicketsTable(filteredTickets);
+            });
+        }
+
+        function hideAllViews() {
+            dashboardView.classList.add('hidden');
+            myTicketsView.classList.add('hidden');
+            newTicketView.classList.add('hidden');
+            ticketDetailView.classList.add('hidden');
+            adminUsersView.classList.add('hidden');
+            adminTicketsView.classList.add('hidden');
+            addUserModal.classList.add('hidden');
+        }
+
+        function renderTicketList(tickets, containerId) {
+            const container = document.getElementById(containerId);
+            container.innerHTML = '';
+
+            if (tickets.length === 0) {
+                container.innerHTML = `
+                    <div class="p-8 text-center text-gray-500">
+                        <i class="fas fa-ticket-alt text-4xl mb-4 text-gray-300"></i>
+                        <p>Nenhum chamado encontrado</p>
+                    </div>
+                `;
+                return;
+            }
+
+            tickets.forEach(ticket => {
+                const createdByUser = users.find(u => u.id === ticket.createdBy);
+                const assignedToUser = ticket.assignedTo ? users.find(u => u.id === ticket.assignedTo) : null;
+
+                const ticketElement = document.createElement('div');
+                ticketElement.className = 'p-4 hover:bg-gray-50 ticket-card';
+                ticketElement.innerHTML = `
+                    <div class="flex justify-between items-start">
+                        <div class="flex-1 min-w-0">
+                            <div class="flex items-center mb-1">
+                                <span class="text-sm font-medium text-gray-900 mr-2">${ticket.title}</span>
+                                <span class="px-2 py-1 text-xs rounded-full ${getStatusClass(ticket.status)}">
+                                    ${getStatusText(ticket.status)}
+                                </span>
+                            </div>
+                            <div class="text-sm text-gray-500 truncate">${ticket.description.substring(0, 100)}${ticket.description.length > 100 ? '...' : ''}</div>
+                        </div>
+                        <div class="ml-4 flex-shrink-0">
+                            <button class="view-ticket-btn bg-white rounded-md text-gray-400 hover:text-gray-500 focus:outline-none" data-id="${ticket.id}">
+                                <i class="fas fa-chevron-right"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="mt-2 flex items-center text-xs text-gray-500">
+                        <span>#${ticket.id}</span>
+                        <span class="mx-2">•</span>
+                        <span>${formatDate(ticket.createdAt)}</span>
+                        ${assignedToUser ? `
+                            <span class="mx-2">•</span>
+                            <span>Atribuído a ${assignedToUser.name}</span>
+                        ` : ''}
+                    </div>
+                `;
+                container.appendChild(ticketElement);
+
+                // Add event listener to view button
+                ticketElement.querySelector('.view-ticket-btn').addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const ticketId = parseInt(ticketElement.querySelector('.view-ticket-btn').getAttribute('data-id'));
+                    showTicketDetail(ticketId);
+                });
+            });
+        }
+
+        function renderAdminUsersTable(filteredUsers = null) {
+            const usersToDisplay = filteredUsers || users;
+            adminUsersTable.innerHTML = '';
+
+            if (usersToDisplay.length === 0) {
+                adminUsersTable.innerHTML = `
+                    <tr>
+                        <td colspan="5" class="px-6 py-4 text-center text-gray-500">
+                            Nenhum usuário encontrado
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            usersToDisplay.forEach(user => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${user.name}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${user.email}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${user.role === 'admin' ? 'Administrador' : 'Usuário'}</td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <span class="px-2 py-1 text-xs rounded-full ${user.active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}">
+                            ${user.active ? 'Ativo' : 'Inativo'}
+                        </span>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                        ${user.id !== currentUser.id ? `
+                            <a href="#" class="text-blue-600 hover:text-blue-900 edit-user mr-3" data-id="${user.id}">Editar</a>
+                            <a href="#" class="text-red-600 hover:text-red-900 delete-user" data-id="${user.id}">Excluir</a>
+                        ` : ''}
+                    </td>
+                `;
+                adminUsersTable.appendChild(row);
+
+                // Add event listeners to action buttons
+                if (user.id !== currentUser.id) {
+                    row.querySelector('.edit-user').addEventListener('click', (e) => {
+                        e.preventDefault();
+                        // In a real app, this would open an edit form
+                        alert('Editar usuário: ' + user.name);
+                    });
+
+                    row.querySelector('.delete-user').addEventListener('click', (e) => {
+                        e.preventDefault();
+                        if (confirm(`Tem certeza que deseja excluir o usuário ${user.name}?`)) {
+                            // In a real app, this would delete the user
+                            alert('Usuário excluído: ' + user.name);
+                        }
+                    });
+                }
+            });
+        }
+
+        function renderAdminTicketsTable(filteredTickets = null) {
+            const statusFilter = document.getElementById('adminTicketFilter').value;
+            const assignedFilter = document.getElementById('adminAssignedFilter').value;
+
+            let ticketsToDisplay = filteredTickets || [...tickets];
+
+            // Apply status filter
+            if (statusFilter !== 'all') {
+                ticketsToDisplay = ticketsToDisplay.filter(t => t.status === statusFilter);
+            }
+
+            // Apply assigned filter
+            if (assignedFilter === 'me') {
+                ticketsToDisplay = ticketsToDisplay.filter(t => t.assignedTo === currentUser.id);
+            } else if (assignedFilter === 'others') {
+                ticketsToDisplay = ticketsToDisplay.filter(t => t.assignedTo !== null && t.assignedTo !== currentUser.id);
+            } else if (assignedFilter === 'unassigned') {
+                ticketsToDisplay = ticketsToDisplay.filter(t => t.assignedTo === null);
+            }
+
+            adminTicketsTable.innerHTML = '';
+
+            if (ticketsToDisplay.length === 0) {
+                adminTicketsTable.innerHTML = `
+                    <tr>
+                        <td colspan="7" class="px-6 py-4 text-center text-gray-500">
+                            Nenhum chamado encontrado
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            // Sort by date (newest first)
+            ticketsToDisplay.sort((a, b) => b.createdAt - a.createdAt);
+
+            ticketsToDisplay.forEach(ticket => {
+                const createdByUser = users.find(u => u.id === ticket.createdBy);
+                const assignedToUser = ticket.assignedTo ? users.find(u => u.id === ticket.assignedTo) : null;
+
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">#${ticket.id}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                        <a href="#" class="text-blue-600 hover:text-blue-900 view-ticket" data-id="${ticket.id}">${ticket.title}</a>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${createdByUser.name}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        ${assignedToUser ? assignedToUser.name : 'Não atribuído'}
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <span class="px-2 py-1 text-xs rounded-full ${getStatusClass(ticket.status)}">
+                            ${getStatusText(ticket.status)}
+                        </span>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        ${formatDate(ticket.createdAt)}
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                        <a href="#" class="text-blue-600 hover:text-blue-900 view-ticket" data-id="${ticket.id}">Ver</a>
+                    </td>
+                `;
+                adminTicketsTable.appendChild(row);
+
+                // Add event listener to view button
+                row.querySelector('.view-ticket').addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const ticketId = parseInt(row.querySelector('.view-ticket').getAttribute('data-id'));
+                    showTicketDetail(ticketId);
+                });
+            });
+        }
+
+        function handleNewTicketSubmit(e) {
+            e.preventDefault();
+
+            const title = document.getElementById('ticketTitle').value;
+            const description = document.getElementById('ticketDescription').value;
+
+            // Create new ticket
+            const newTicket = {
+                id: tickets.length > 0 ? Math.max(...tickets.map(t => t.id)) + 1 : 1,
+                title: title,
+                description: description,
+                status: 'open',
+                createdBy: currentUser.id,
+                assignedTo: null,
+                createdAt: new Date(),
+                files: selectedFiles.map(f => f.name),
+                comments: []
+            };
+
+            tickets.push(newTicket);
+
+            // Show success message
+            alert('Chamado criado com sucesso!');
+
+            // Go back to tickets list
+            showMyTickets();
+        }
+
+        function handleFileUpload(e) {
+            const files = e.target.files;
+            filePreviews.innerHTML = '';
+            selectedFiles = [];
+
+            for (let i = 0; i < files.length; i++) {
+                const file = files[i];
+                selectedFiles.push(file);
+
+                const filePreview = document.createElement('div');
+                filePreview.className = 'flex items-center p-2 bg-gray-100 rounded-md mr-2 mb-2';
+
+                // Get file icon based on type
+                const fileExt = file.name.split('.').pop().toLowerCase();
+                let iconClass = 'fa-file';
+
+                if (['jpg', 'jpeg', 'png', 'gif'].includes(fileExt)) {
+                    iconClass = 'fa-file-image';
+
+                    // Create image preview
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        const imgPreview = document.createElement('img');
+                        imgPreview.src = e.target.result;
+                        imgPreview.className = 'file-preview';
+                        imgPreview.alt = file.name;
+                        filePreview.insertBefore(imgPreview, filePreview.firstChild);
+                    };
+                    reader.readAsDataURL(file);
+                } else if (['pdf'].includes(fileExt)) {
+                    iconClass = 'fa-file-pdf';
+                } else if (['doc', 'docx'].includes(fileExt)) {
+                    iconClass = 'fa-file-word';
+                } else if (['xls', 'xlsx'].includes(fileExt)) {
+                    iconClass = 'fa-file-excel';
+                }
+
+                const fileInfo = document.createElement('div');
+                fileInfo.className = 'ml-2';
+                fileInfo.innerHTML = `
+                    <div class="text-sm font-medium truncate" style="max-width: 150px;">${file.name}</div>
+                    <div class="text-xs text-gray-500">${formatFileSize(file.size)}</div>
+                `;
+
+                const removeBtn = document.createElement('button');
+                removeBtn.className = 'ml-2 text-red-500 hover:text-red-700';
+                removeBtn.innerHTML = '<i class="fas fa-times"></i>';
+                removeBtn.addEventListener('click', () => {
+                    selectedFiles = selectedFiles.filter(f => f !== file);
+                    filePreview.remove();
+                });
+
+                filePreview.innerHTML = `
+                    <i class="fas ${iconClass} text-gray-500 mr-2"></i>
+                `;
+                filePreview.appendChild(fileInfo);
+                filePreview.appendChild(removeBtn);
+                filePreviews.appendChild(filePreview);
+            }
+        }
+
+        function handleAddComment(e) {
+            e.preventDefault();
+
+            const commentTextValue = commentText.value.trim();
+            if (!commentTextValue) return;
+
+            const ticketId = parseInt(resolveTicketBtn.getAttribute('data-ticket-id'));
+            const ticket = tickets.find(t => t.id === ticketId);
+
+            const newComment = {
+                userId: currentUser.id,
+                text: commentTextValue,
+                createdAt: new Date()
+            };
+
+            ticket.comments.push(newComment);
+
+            // Clear comment field
+            commentText.value = '';
+
+            // Refresh ticket detail view
+            showTicketDetail(ticketId);
+        }
+
+        function handleAssignToMe() {
+            const ticketId = parseInt(assignToMeBtn.getAttribute('data-ticket-id'));
+            assignTicketToUser(ticketId, currentUser.id);
+        }
+
+        function assignTicketToUser(ticketId, userId) {
+            const ticket = tickets.find(t => t.id === ticketId);
+
+            if (ticket.status === 'open') {
+                ticket.status = 'in_progress';
+            }
+
+            ticket.assignedTo = userId;
+
+            // Refresh ticket detail view
+            showTicketDetail(ticketId);
+
+            // Show success message
+            const user = users.find(u => u.id === userId);
+            alert(`Chamado atribuído para ${user.name}`);
+        }
+
+        function handleResolveTicket() {
+            const ticketId = parseInt(resolveTicketBtn.getAttribute('data-ticket-id'));
+            const ticket = tickets.find(t => t.id === ticketId);
+
+            ticket.status = 'resolved';
+
+            // Refresh ticket detail view
+            showTicketDetail(ticketId);
+
+            // Show success message
+            alert('Chamado marcado como resolvido');
+        }
+
+        function handleAddUser(e) {
+            e.preventDefault();
+
+            const name = document.getElementById('userName').value;
+            const email = document.getElementById('userEmail').value;
+            const role = document.getElementById('userType').value;
+            const password = document.getElementById('userPassword').value;
+
+            // Check if email already exists
+            if (users.some(u => u.email === email)) {
+                alert('Já existe um usuário com este email');
+                return;
+            }
+
+            // Create new user
+            const newUser = {
+                id: users.length > 0 ? Math.max(...users.map(u => u.id)) + 1 : 1,
+                name: name,
+                email: email,
+                password: password,
+                role: role,
+                active: true
+            };
+
+            users.push(newUser);
+
+            // Hide modal and reset form
+            addUserModal.classList.add('hidden');
+            addUserForm.reset();
+
+            // Refresh users table
+            renderAdminUsersTable();
+
+            // Show success message
+            alert('Usuário criado com sucesso!');
+        }
+
+        // Helper functions
+        function getStatusText(status) {
+            switch (status) {
+                case 'open': return 'Aberto';
+                case 'in_progress': return 'Em Andamento';
+                case 'resolved': return 'Resolvido';
+                default: return status;
+            }
+        }
+
+        function getStatusClass(status) {
+            switch (status) {
+                case 'open': return 'bg-blue-100 text-blue-800';
+                case 'in_progress': return 'bg-yellow-100 text-yellow-800';
+                case 'resolved': return 'bg-green-100 text-green-800';
+                default: return 'bg-gray-100 text-gray-800';
+            }
+        }
+
+        function formatDate(date) {
+            return date.toLocaleDateString('pt-BR');
+        }
+
+        function formatDateTime(date) {
+            return date.toLocaleString('pt-BR');
+        }
+
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+    </script>
+</body>
+</html>
