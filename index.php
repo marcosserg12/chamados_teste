@@ -77,8 +77,7 @@ $uri = $_SERVER['HTTP_HOST'];
     </div>
 </body>
 
-<script src="./assets/vendors/general/jquery/dist/jquery.js" type="text/javascript"></script>
-<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="../assets/js/custom/scripts/jquery-3.7.1.min.js"></script>
     <script src="../assets/js/custom/scripts/sweetalert2.js"></script>
 
 <script src="./assets/js/appLogin/login.js" type="text/javascript"></script>
