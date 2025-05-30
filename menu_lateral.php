@@ -11,7 +11,7 @@
     <nav class="p-4">
         <ul>
             <li class="mb-2">
-                <a href="../principal" class="flex items-center p-2 text-gray-700 rounded-lg hover:bg-blue-50" id="dashboardLink">
+                <a href="../principal.php" class="flex items-center p-2 text-gray-700 rounded-lg hover:bg-blue-50" id="dashboardLink">
                     <i class="fas fa-tachometer-alt mr-3"></i>
                     <span>Dashboard</span>
                 </a>
