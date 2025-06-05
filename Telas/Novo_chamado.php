@@ -179,8 +179,7 @@ $id_usuario = Security::getUser()['id_usuario']; ?>
                 contentType: false,
                 success: function(response) {
                     swal.fire({
-                        title: "Chamado Cadastrado com Sucesso!",
-                        text: response.message,
+                        title: response.message,
                         icon: "success"
                     }).then((result) => {
                         location.reload();

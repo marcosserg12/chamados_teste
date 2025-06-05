@@ -8,7 +8,7 @@ try{
     $id_chamado = $chamados->gravar($_POST);
 
     echo json_response([
-        'message' => 'Dados alterados com sucesso!',
+        'message' => 'Chamado cadastrado com sucesso!',
         'data' => [
             'id_chamado' => $id_chamado
         ]
