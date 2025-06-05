@@ -178,7 +178,13 @@ $id_usuario = Security::getUser()['id_usuario']; ?>
                 processData: false,
                 contentType: false,
                 success: function(response) {
-                    console.log('Sucesso:', response);
+                    swal.fire({
+                        title: "Chamado Cadastrado com Sucesso!",
+                        text: response.message,
+                        icon: "success"
+                    }).then((result) => {
+                        location.reload();
+                    });
                 },
                 error: function(xhr, status, error) {
                     console.error('Erro:', xhr.responseText);

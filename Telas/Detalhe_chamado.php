@@ -10,6 +10,7 @@ if (!Security::isAuthenticated()) {
     redirect('../index.php');
 }
 $id_usuario = Security::getUser()['id_usuario'];
+$id_perfil = Security::getUser()['id_perfil'];
 $id_chamado = $_REQUEST['id_chamado'];
 $chamados = new Chamados();
 $usuario = new Usuario();
@@ -70,6 +71,7 @@ if ($dados['st_status'] == 0) {
                                     </div>
                                 <?php endif; ?>
                             </div>
+                            <?php if($id_perfil == 1) { ?>
                             <div id="adminTicketActions">
                                 <div class="flex space-x-2">
                                     <?php if ($dados['st_status'] != 9): ?>
@@ -106,6 +108,7 @@ if ($dados['st_status'] == 0) {
                                         <?php endif; ?>
                                 </div>
                             </div>
+                            <?php } ?>
                         </div>
                     </div>
                     <div class="p-6">
