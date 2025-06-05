@@ -33,8 +33,8 @@
                     <div class="mb-4">
                         <label class="block text-gray-700 text-sm font-bold mb-2" for="userType">Tipo de Usuário</label>
                         <select class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="edit_userType" name="edit_id_perfil" required>
-                            <option value="1">Usuário Normal</option>
-                            <option value="2">Administrador</option>
+                            <option value="2">Usuário Normal</option>
+                            <option value="1">Administrador</option>
                         </select>
                     </div>
                     <div class="mb-6">
