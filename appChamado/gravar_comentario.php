@@ -9,8 +9,8 @@ try {
     $nu_telefone = $chamados->verificarNumeroTelChamado($_POST['id_chamado']);
     // Configurações da Evolution API
     $evolutionSender = new EvolutionWhatsAppSender(
-        'http://localhost:8081',
-        '89E093815F3C-417C-8D6C-9A7A3DA8F301',
+        'http://145.223.26.225:8081/',
+        'B825E8E34BE9-4486-AD4E-C4B8ECA49257',
         'teste'
     );
 
