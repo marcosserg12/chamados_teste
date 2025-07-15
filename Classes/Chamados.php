@@ -94,7 +94,8 @@ class Chamados
                     id_tipo_chamado,
                     id_motivo_principal,
                     id_motivo_associado,
-                    ds_patrimonio
+                    ds_patrimonio,
+                    st_grau
                 ) VALUES (
                     :id_usuario,
                     :ds_titulo,
@@ -105,7 +106,8 @@ class Chamados
                     :id_tipo_chamado,
                     :id_motivo_principal,
                     :id_motivo_associado,
-                    :ds_patrimonio
+                    :ds_patrimonio,
+                    :st_grau
                 );
             ";
 
@@ -121,7 +123,8 @@ class Chamados
             ':id_tipo_chamado' => $dados['id_tipo_chamado'],
             ':id_motivo_principal' => $dados['id_motivo_principal'],
             ':id_motivo_associado' => $dados['id_motivo_associado'],
-            ':ds_patrimonio' => $dados['ds_patrimonio']
+            ':ds_patrimonio' => $dados['ds_patrimonio'],
+            ':st_grau' => $dados['st_grau']
         ]);
         $id_chamado = $connection->lastInsertId();
         $this->salvarArquivosChamado($id_chamado);
@@ -377,7 +380,7 @@ class Chamados
         LEFT JOIN tb_usuario u ON he.id_usuario = u.id_usuario
         WHERE he.id_chamado = :id_chamado
 
-        ORDER BY dt_evento;
+        ORDER BY dt_evento desc;
     ";
 
         $stmt = $con->prepare($select);

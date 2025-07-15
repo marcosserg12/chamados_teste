@@ -215,7 +215,21 @@ $dados_arquivos = $chamados->mostrararquivosChamado($id_chamado);
 
                         </div>
 
-                        <div class="mb-6" id="div_patrimonio" style="display: none;">
+                        <div class="mb-4" id="div_st_grau" <?php echo $dados['id_motivo_associado'] == '6' && $dados['id_tipo_chamado'] == '2' ? '' : 'style="display: none;"' ?> >
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Tipo <span class="text-red-500">*</span></label>
+                            <div class="flex space-x-6">
+                                <label class="inline-flex items-center">
+                                    <input type="radio" id="st_grau_1" <?php echo $dados['st_grau'] == '1' ? 'checked' : '' ?> name="st_grau" value="1" class="form-radio text-blue-600">
+                                    <span class="ml-2 text-gray-700">Melhoria</span>
+                                </label>
+                                <label class="inline-flex items-center">
+                                    <input type="radio" id="st_grau_2" <?php echo $dados['st_grau'] == '2' ? 'checked' : '' ?> name="st_grau" value="2" class="form-radio text-blue-600">
+                                    <span class="ml-2 text-gray-700">Problema</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="mb-6" id="div_patrimonio" <?php echo $dados['id_tipo_chamado'] == '1' ? '' : 'style="display: none;"' ?>>
                             <label for="ticketTitle" class="block text-sm font-medium text-gray-700 mb-2">
                                 Patrimônio
                                 <span class="ml-1 relative group cursor-pointer">
@@ -375,6 +389,53 @@ $dados_arquivos = $chamados->mostrararquivosChamado($id_chamado);
 
     $('#form_editar_chamado').on('submit', function(e) {
         e.preventDefault();
+
+        // Remove erros anteriores
+        $('#form_novo_chamado [required]').removeClass('border-red-500');
+        $('#form_novo_chamado .error-message').remove();
+
+        let isValid = true;
+
+        let validatedRadios = [];
+
+        $('#form_novo_chamado [required]').each(function() {
+            const name = $(this).attr('name');
+            const type = $(this).attr('type');
+
+            // Se for radio, só valida uma vez por grupo
+            if (type === 'radio') {
+                if (validatedRadios.includes(name)) return;
+                validatedRadios.push(name);
+
+                if ($(`input[name="${name}"]:checked`).length === 0) {
+                    isValid = false;
+                    const group = $(`input[name="${name}"]`).last().parent().parent(); // div com os radios
+                    group.after('<p class="text-red-500 text-sm mt-1 error-message">Este campo é obrigatório.</p>');
+                }
+            } else {
+                const value = $(this).val()?.trim();
+                if (!value) {
+                    isValid = false;
+                    $(this).addClass('border-red-500');
+                    const isSelect2 = $(this).hasClass('select2');
+                    const errorMsg = '<p class="text-red-500 text-sm mt-1 error-message">Este campo é obrigatório.</p>';
+
+                    if (isSelect2) {
+                        $(this).next('.select2').after(errorMsg);
+                    } else {
+                        $(this).after(errorMsg);
+                    }
+                }
+            }
+        });
+
+
+
+        // Interrompe envio se estiver inválido
+        if (!isValid) {
+            return;
+        }
+
         const idChamado = $('input[name="id_chamado"]').val();
 
         const formData = new FormData(this);
@@ -443,6 +504,14 @@ $dados_arquivos = $chamados->mostrararquivosChamado($id_chamado);
         // Quando escolher o motivo principal, carrega os associados
         $('#motivo_principal').on('change', function() {
             const idMotivo = $(this).val();
+
+            if (idMotivo === '6') {
+                $('#div_st_grau').show();
+                $('input[name="st_st_grau"]').attr('required', true);
+            } else {
+                $('#div_st_grau').hide();
+                $('input[name="st_st_grau"]').removeAttr('required');
+            }
 
             $('#motivo_associado').html('<option value="">Carregando...</option>');
 

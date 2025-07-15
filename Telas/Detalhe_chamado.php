@@ -66,12 +66,15 @@ if ($dados['st_status'] == 0) {
                     <div class="p-6 border-b border-gray-200">
                         <div class="flex flex-wrap justify-between gap-4 items-start">
                             <div>
-                                <h3 class="text-lg font-bold text-gray-800" id="detailTicketTitle"><?= $dados['ds_titulo'] ?></h3>
+                                <h3 class="text-lg font-bold text-gray-800" id="detailTicketTitle"><?= $dados['ds_titulo'] ?> <span class="ml-3 text-sm text-gray-500" id="detailTicketId">#<?= $dados['id_chamado'] ?></span></h3>
+                                <span class="px-2 py-1 text-xs rounded-full bg-blue-100 text-blue-800">
+                                    Criado por : <?= $dados['criador'] ?>
+                                </span>
                                 <span class="ml-3 text-sm text-gray-500" id="detailTicketDate">Abertura em: <?= $geral->formataData($dados['dt_data_chamado']) ?></span>
                                 <span class="ml-3 text-sm text-gray-500" id="detailTicketHour"><?= $geral->formataHora($dados['dt_data_chamado']) ?></span>
                                 <div class="flex items-center mt-2">
                                     <span id="detailTicketStatus"><?= $st_status ?></span>
-                                    <span class="ml-3 text-sm text-gray-500" id="detailTicketId">#<?= $dados['id_chamado'] ?></span>
+
 
                                     <span class="ml-3 text-sm text-gray-500" id="detailTicketDate">Ultimo status: <?= $geral->formataData($dados['dt_update']) ?></span>
                                     <span class="ml-3 text-sm text-gray-500" id="detailTicketHour"><?= $geral->formataHora($dados['dt_update']) ?></span>
@@ -233,6 +236,27 @@ if ($dados['st_status'] == 0) {
                             </div>
                         </div>
                     </div>
+                    <div class="p-6"  <?php echo $dados['id_motivo_associado'] == '6' && $dados['id_tipo_chamado'] == '2' ? '' : 'style="display: none;"' ?>>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div>
+                                <h4 class="text-sm font-medium text-gray-500 mb-2">Tipo</h4>
+                                <p class="text-gray-700">
+                                    <?php echo $dados['st_grau'] == '1' ? 'Melhoria' : '' ?>
+                                    <?php echo $dados['st_grau'] == '2' ? 'Problema' : '' ?>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="p-6"  <?php echo $dados['id_tipo_chamado'] == '1' && $dados['ds_patrimonio'] != '' ? '' : 'style="display: none;"' ?>>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div>
+                                <h4 class="text-sm font-medium text-gray-500 mb-2">Patrimônio</h4>
+                                <p class="text-gray-700">
+                                    <?php echo $dados['ds_patrimonio']   ?>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
 
                     <div class="p-6">
                         <div class="mb-6">
@@ -295,18 +319,6 @@ if ($dados['st_status'] == 0) {
                         <div>
                             <h4 class="text-sm font-medium text-gray-500 mb-2">Histórico</h4>
                             <div class="space-y-4 max-h-[400px] overflow-y-auto" id="ticketHistory">
-                                <div class="flex items-start">
-                                    <div class="flex-shrink-0 mr-3">
-                                        <div class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-600">
-                                            <i class="fas fa-ticket-alt"></i>
-                                        </div>
-                                    </div>
-                                    <div class="flex-1 min-w-0">
-                                        <div class="text-sm font-medium text-gray-900"><?= $dados['criador'] ?></div>
-                                        <div class="text-sm text-gray-500">Criou o chamado</div>
-                                        <div class="mt-1 text-sm text-gray-500"><?= $geral->formataData($dados['dt_data_chamado']) ?>, <?= $geral->formataHora($dados['dt_data_chamado']) ?></div>
-                                    </div>
-                                </div>
                                 <?php foreach ($historicos as $historico) : ?>
                                     <!-- Historico de pessoas atribuidas para o chamado -->
                                     <?php if ($historico['origem'] == 'usuario_chamado') : ?>
@@ -381,6 +393,18 @@ if ($dados['st_status'] == 0) {
                                         </div>
                                 <?php endif;
                                 endforeach; ?>
+                                <div class="flex items-start">
+                                    <div class="flex-shrink-0 mr-3">
+                                        <div class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-600">
+                                            <i class="fas fa-ticket-alt"></i>
+                                        </div>
+                                    </div>
+                                    <div class="flex-1 min-w-0">
+                                        <div class="text-sm font-medium text-gray-900"><?= $dados['criador'] ?></div>
+                                        <div class="text-sm text-gray-500">Criou o chamado</div>
+                                        <div class="mt-1 text-sm text-gray-500"><?= $geral->formataData($dados['dt_data_chamado']) ?>, <?= $geral->formataHora($dados['dt_data_chamado']) ?></div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>

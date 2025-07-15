@@ -172,6 +172,20 @@ $id_usuario = Security::getUser()['id_usuario']; ?>
 
                         </div>
 
+                        <div class="mb-4" id="div_st_grau" style="display: none;">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Tipo <span class="text-red-500">*</span></label>
+                            <div class="flex space-x-6">
+                                <label class="inline-flex items-center">
+                                    <input type="radio" id="st_grau_1" name="st_grau" value="1" class="form-radio text-blue-600">
+                                    <span class="ml-2 text-gray-700">Melhoria</span>
+                                </label>
+                                <label class="inline-flex items-center">
+                                    <input type="radio" id="st_grau_2" name="st_grau" value="2" class="form-radio text-blue-600">
+                                    <span class="ml-2 text-gray-700">Problema</span>
+                                </label>
+                            </div>
+                        </div>
+
                         <div class="mb-6" id="div_patrimonio" style="display: none;">
                             <label for="ticketTitle" class="block text-sm font-medium text-gray-700 mb-2">
                                 Patrimônio
@@ -328,22 +342,40 @@ $id_usuario = Security::getUser()['id_usuario']; ?>
 
             let isValid = true;
 
+            let validatedRadios = [];
+
             $('#form_novo_chamado [required]').each(function() {
-                const value = $(this).val()?.trim();
+                const name = $(this).attr('name');
+                const type = $(this).attr('type');
 
-                if (!value) {
-                    isValid = false;
-                    $(this).addClass('border-red-500');
-                    const isSelect2 = $(this).hasClass('select2');
-                    const errorMsg = '<p class="text-red-500 text-sm mt-1 error-message">Este campo é obrigatório.</p>';
+                // Se for radio, só valida uma vez por grupo
+                if (type === 'radio') {
+                    if (validatedRadios.includes(name)) return;
+                    validatedRadios.push(name);
 
-                    if (isSelect2) {
-                        $(this).next('.select2').after(errorMsg);
-                    } else {
-                        $(this).after(errorMsg);
+                    if ($(`input[name="${name}"]:checked`).length === 0) {
+                        isValid = false;
+                        const group = $(`input[name="${name}"]`).last().parent().parent(); // div com os radios
+                        group.after('<p class="text-red-500 text-sm mt-1 error-message">Este campo é obrigatório.</p>');
+                    }
+                } else {
+                    const value = $(this).val()?.trim();
+                    if (!value) {
+                        isValid = false;
+                        $(this).addClass('border-red-500');
+                        const isSelect2 = $(this).hasClass('select2');
+                        const errorMsg = '<p class="text-red-500 text-sm mt-1 error-message">Este campo é obrigatório.</p>';
+
+                        if (isSelect2) {
+                            $(this).next('.select2').after(errorMsg);
+                        } else {
+                            $(this).after(errorMsg);
+                        }
                     }
                 }
             });
+
+
 
             // Interrompe envio se estiver inválido
             if (!isValid) {
@@ -389,9 +421,10 @@ $id_usuario = Security::getUser()['id_usuario']; ?>
                 const idTipo = $(this).val();
 
                 if (idTipo === "1") {
-                    $('#div_patrimonio').show(); // ou .removeClass('hidden')
+                    $('#div_patrimonio').show();
+
                 } else {
-                    $('#div_patrimonio').hide(); // ou .addClass('hidden')
+                    $('#div_patrimonio').hide();
                 }
 
                 $('#motivo_principal').html('<option value="">Carregando...</option>');
@@ -423,6 +456,13 @@ $id_usuario = Security::getUser()['id_usuario']; ?>
             $('#motivo_principal').on('change', function() {
                 const idMotivo = $(this).val();
 
+                if (idMotivo === '6') {
+                    $('#div_st_grau').show();
+                    $('input[name="st_st_grau"]').attr('required', true);
+                } else {
+                    $('#div_st_grau').hide();
+                    $('input[name="st_st_grau"]').removeAttr('required');
+                }
                 $('#motivo_associado').html('<option value="">Carregando...</option>');
 
                 if (idMotivo) {
