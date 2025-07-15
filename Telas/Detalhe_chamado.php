@@ -20,6 +20,16 @@ $dados_arquivos = $chamados->mostrararquivosChamado($id_chamado);
 $historicos = $chamados->lista_historico($id_chamado);
 $lista_usuarios = $usuario->listarUsuario_adm($id_usuario);
 
+$lista_empresas = $chamados->lista_empresas();
+$lista_localizacao = $chamados->lista_localizacao($dados['id_empresa']);
+$lista_tipo_chamado = $chamados->lista_tipos_chamados();
+$lista_motivo = $chamados->lista_motivo($dados['id_tipo_chamado']);
+$lista_motivo_associado = $chamados->lista_motivo_associado($dados['id_motivo_principal']);
+
+$dataAtual = new DateTime('now', new DateTimeZone('America/Sao_Paulo'));
+$dt_update = new DateTime($dados['dt_update']); // se vier no formato Y-m-d H:i:s
+$intervalo = $dataAtual->diff($dt_update)->days;
+
 if ($dados['st_status'] == 0) {
     $st_status = '<span class="px-2 py-1 text-xs rounded-full bg-blue-100 text-blue-800">
                             Aberto
@@ -57,11 +67,14 @@ if ($dados['st_status'] == 0) {
                         <div class="flex flex-wrap justify-between gap-4 items-start">
                             <div>
                                 <h3 class="text-lg font-bold text-gray-800" id="detailTicketTitle"><?= $dados['ds_titulo'] ?></h3>
+                                <span class="ml-3 text-sm text-gray-500" id="detailTicketDate">Abertura em: <?= $geral->formataData($dados['dt_data_chamado']) ?></span>
+                                <span class="ml-3 text-sm text-gray-500" id="detailTicketHour"><?= $geral->formataHora($dados['dt_data_chamado']) ?></span>
                                 <div class="flex items-center mt-2">
                                     <span id="detailTicketStatus"><?= $st_status ?></span>
                                     <span class="ml-3 text-sm text-gray-500" id="detailTicketId">#<?= $dados['id_chamado'] ?></span>
-                                    <span class="ml-3 text-sm text-gray-500" id="detailTicketDate"><?= $geral->formataData($dados['dt_data_chamado']) ?></span>
-                                    <span class="ml-3 text-sm text-gray-500" id="detailTicketHour"><?= $geral->formataHora($dados['dt_data_chamado']) ?></span>
+
+                                    <span class="ml-3 text-sm text-gray-500" id="detailTicketDate">Ultimo status: <?= $geral->formataData($dados['dt_update']) ?></span>
+                                    <span class="ml-3 text-sm text-gray-500" id="detailTicketHour"><?= $geral->formataHora($dados['dt_update']) ?></span>
                                 </div>
                                 <?php if ($dados['st_status'] != 0) : ?>
                                     <div class="flex items-center mt-2">
@@ -71,46 +84,156 @@ if ($dados['st_status'] == 0) {
                                     </div>
                                 <?php endif; ?>
                             </div>
-                            <?php if($id_perfil == 1) { ?>
-                            <div id="adminTicketActions">
-                                <div class="flex space-x-2">
-                                    <?php if ($dados['st_status'] != 9): ?>
-                                        <?php if ($dados['id_usuario_designado'] != $id_usuario): ?>
-                                            <button id="assignToMeBtn" onclick="assumirChamado()" class="bg-blue-100 text-blue-700 px-3 py-1 rounded-md text-sm flex items-center">
-                                                <i class="fas fa-user-plus mr-1"></i> Assumir
-                                            </button>
-                                        <?php endif; ?>
-                                        <div class="relative">
-                                            <button id="assignDropdownBtn" class="bg-gray-100 text-gray-700 px-3 py-1 rounded-md text-sm flex items-center">
-                                                <i class="fas fa-users mr-1"></i> Designar
-                                                <i class="fas fa-chevron-down ml-1"></i>
-                                            </button>
+                            <?php if ($id_perfil == 1) { ?>
+                                <div id="adminTicketActions">
+                                    <div class="flex space-x-2">
+                                        <?php if ($dados['st_status'] != 9): ?>
+                                            <?php if ($dados['id_usuario_designado'] != $id_usuario): ?>
+                                                <button id="assignToMeBtn" onclick="assumirChamado()" class="bg-blue-100 text-blue-700 px-3 py-1 rounded-md text-sm flex items-center">
+                                                    <i class="fas fa-user-plus mr-1"></i> Assumir
+                                                </button>
+                                            <?php endif; ?>
+                                            <div class="relative">
+                                                <button id="assignDropdownBtn" class="bg-gray-100 text-gray-700 px-3 py-1 rounded-md text-sm flex items-center">
+                                                    <i class="fas fa-users mr-1"></i> Designar
+                                                    <i class="fas fa-chevron-down ml-1"></i>
+                                                </button>
 
-                                            <div id="assignDropdown" class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg z-10 hidden">
-                                                <div class="py-1" id="adminUsersList">
-                                                    <?php foreach ($lista_usuarios as $usuario): ?>
-                                                        <button
-                                                            class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                                                            onclick="designarUsuario(<?= $usuario['id_usuario'] ?>,'<?= $usuario['ds_nome'] ?>')">
-                                                            <?= htmlspecialchars($usuario['ds_nome']) ?>
-                                                        </button>
-                                                    <?php endforeach; ?>
+                                                <div id="assignDropdown" class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg z-10 hidden">
+                                                    <div class="py-1" id="adminUsersList">
+                                                        <?php foreach ($lista_usuarios as $usuario): ?>
+                                                            <button
+                                                                class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                                                                onclick="designarUsuario(<?= $usuario['id_usuario'] ?>,'<?= $usuario['ds_nome'] ?>')">
+                                                                <?= htmlspecialchars($usuario['ds_nome']) ?>
+                                                            </button>
+                                                        <?php endforeach; ?>
+                                                    </div>
                                                 </div>
                                             </div>
-                                        </div>
-                                    <?php endif; ?>
-                                    <?php if ($dados['st_status'] != 0): ?>
-                                        <button id="resolveTicketBtn" onclick="resolver_reabrir(<?= $id_usuario ?>,<?= $dados['id_chamado'] ?>,0)" class="bg-orange-100 text-orange-700 px-3 py-1 rounded-md text-sm flex items-center"><i class="fas fa-redo mr-1"></i> Reabrir Chamado
                                         <?php endif; ?>
-                                        <?php if ($dados['st_status'] != 9): ?>
-                                            <button id="resolveTicketBtn" onclick="resolver_reabrir(<?= $id_usuario ?>,<?= $dados['id_chamado'] ?>,9)" class="bg-green-100 text-green-700 px-3 py-1 rounded-md text-sm flex items-center"><i class="fas fa-check mr-1"></i> Resolvido
-                                            </button>
-                                        <?php endif; ?>
+                                        <?php if ($dados['st_status'] != 0): ?>
+                                            <button id="resolveTicketBtn" onclick="resolver_reabrir(<?= $id_usuario ?>,<?= $dados['id_chamado'] ?>,0)" class="bg-orange-100 text-orange-700 px-3 py-1 rounded-md text-sm flex items-center"><i class="fas fa-redo mr-1"></i> Reabrir Chamado
+                                            <?php endif; ?>
+                                            <?php if ($dados['st_status'] != 9 && $dados['designado'] != null): ?>
+                                                <button id="resolveTicketBtn" onclick="resolver_reabrir(<?= $id_usuario ?>,<?= $dados['id_chamado'] ?>,9)" class="bg-green-100 text-green-700 px-3 py-1 rounded-md text-sm flex items-center"><i class="fas fa-check mr-1"></i> Resolvido
+                                                </button>
+                                            <?php endif; ?>
+                                            <?php if (($dados['id_usuario_designado'] == $id_usuario || $dados['id_usuario'] == $id_usuario) && $dados['st_status'] != 9): ?>
+                                                <a href="../Telas/Editar_chamado.php?id_chamado=<?= $dados['id_chamado'] ?>" class="bg-purple-100 text-purple-700 px-3 py-1 rounded-md text-sm flex items-center">
+                                                    <i class="fas fa-edit mr-1"></i> Editar
+                                                </a>
+                                            <?php endif; ?>
+                                            <?php if ($id_perfil == 2 && $dados['st_status'] == 9 && $intervalo <= 1): ?>
+                                                <button id="resolveTicketBtn" onclick="resolver_reabrir(<?= $id_usuario ?>,<?= $dados['id_chamado'] ?>,0)" class="bg-orange-100 text-orange-700 px-3 py-1 rounded-md text-sm flex items-center"><i class="fas fa-redo mr-1"></i> Reabrir Chamado
+                                                <?php endif; ?>
+
+                                    </div>
                                 </div>
-                            </div>
                             <?php } ?>
                         </div>
                     </div>
+                    <!-- Empresa e Localização -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 p-6">
+                        <div>
+                            <h4 class="text-sm font-medium text-gray-500 mb-2">Empresa</h4>
+                            <?php
+                            foreach ($lista_empresas as $empresa) {
+                                if ($empresa['id_empresa'] == $dados['id_empresa']) {
+                                    $nome_empresa = htmlspecialchars($empresa['ds_empresa']);
+
+                                    // Define a cor da badge com base no id_empresa (ajuste conforme seu critério real)
+                                    $corBadge = '';
+                                    $corTexto = 'text-white';
+
+                                    switch ($empresa['id_empresa']) {
+                                        case 1:
+                                            $corBadge = 'bg-[#E69923]'; // laranja
+                                            break;
+                                        case 2:
+                                            $corBadge = 'bg-[#02be9b]'; // verde
+                                            break;
+                                        case 3:
+                                            $corBadge = 'bg-[#00ABCA]'; // azul
+                                            break;
+                                        default:
+                                            $corBadge = 'bg-gray-300';
+                                            $corTexto = 'text-gray-800';
+                                    }
+
+                                    echo "<span class=\"px-3 py-1 text-sm font-medium rounded-full {$corBadge} {$corTexto}\">{$nome_empresa}</span>";
+                                    break;
+                                }
+                            }
+                            ?>
+
+
+                        </div>
+
+                        <div>
+                            <h4 class="text-sm font-medium text-gray-500 mb-2">Localização</h4>
+                            <p class="text-gray-700">
+                                <?php
+                                foreach ($lista_localizacao as $localizacao) {
+                                    if ($localizacao['id_localizacao'] == $dados['id_localizacao']) {
+                                        $nome_local = htmlspecialchars($localizacao['ds_localizacao']);
+                                        echo "<span class=\"px-3 py-1 text-sm font-medium rounded-full bg-gray-200 text-gray-800\">{$nome_local}</span>";
+                                        break;
+                                    }
+                                }
+                                ?>
+                            </p>
+                        </div>
+
+                    </div>
+
+                    <!-- Categoria do Chamado -->
+                    <div class="p-6">
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div>
+                                <h4 class="text-sm font-medium text-gray-500 mb-2">Tipo de Chamado</h4>
+                                <p class="text-gray-700">
+                                    <?php
+                                    foreach ($lista_tipo_chamado as $tipo) {
+                                        if ($tipo['id_tipo_chamado'] == $dados['id_tipo_chamado']) {
+                                            echo htmlspecialchars($tipo['ds_tipo_chamado']);
+                                            break;
+                                        }
+                                    }
+                                    ?>
+                                </p>
+                            </div>
+
+                            <div>
+                                <h4 class="text-sm font-medium text-gray-500 mb-2">Motivo</h4>
+                                <p class="text-gray-700">
+                                    <?php
+                                    foreach ($lista_motivo as $motivo) {
+                                        if ($motivo['id_motivo_principal'] == $dados['id_motivo_principal']) {
+                                            echo htmlspecialchars($motivo['ds_descricao']);
+                                            break;
+                                        }
+                                    }
+                                    ?>
+                                </p>
+                            </div>
+
+                            <div>
+                                <h4 class="text-sm font-medium text-gray-500 mb-2">Detalhamento</h4>
+                                <p class="text-gray-700">
+                                    <?php
+                                    foreach ($lista_motivo_associado as $detalhe) {
+                                        if ($detalhe['id_motivo_associado'] == $dados['id_motivo_associado']) {
+                                            echo htmlspecialchars($detalhe['ds_descricao_motivo']);
+                                            break;
+                                        }
+                                    }
+                                    ?>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="p-6">
                         <div class="mb-6">
                             <h4 class="text-sm font-medium text-gray-500 mb-2">Descrição</h4>
@@ -225,6 +348,20 @@ if ($dados['st_status'] == 0) {
                                             <div class="flex-1 min-w-0">
                                                 <div class="text-sm font-medium text-gray-900">Status alterado</div>
                                                 <div class="text-sm text-gray-500"><?= $st_status_historico; ?></div>
+                                                <div class="mt-1 text-sm text-gray-500"><?= $geral->formataData($historico['dt_evento']) ?>, <?= $geral->formataHora($historico['dt_evento']) ?></div>
+                                            </div>
+                                        </div>
+                                    <?php elseif ($historico['origem'] == 'edicao_chamado') : ?>
+                                        <!-- Historico do Status do chamado -->
+                                        <div class="flex items-start mt-4">
+                                            <div class="flex-shrink-0 mr-3">
+                                                <div class="w-8 h-8 rounded-full bg-purple-100 flex items-center justify-center text-purple-600">
+                                                    <i class="fas fa-edit"></i>
+                                                </div>
+                                            </div>
+                                            <div class="flex-1 min-w-0">
+                                                <div class="text-sm font-medium text-gray-900">Chamado Alterado</div>
+                                                <div class="text-sm text-gray-500">Editado por <?= $historico['ds_nome_usuario']; ?></div>
                                                 <div class="mt-1 text-sm text-gray-500"><?= $geral->formataData($historico['dt_evento']) ?>, <?= $geral->formataHora($historico['dt_evento']) ?></div>
                                             </div>
                                         </div>

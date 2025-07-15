@@ -22,14 +22,12 @@
                     <span>Meus Chamados</span>
                 </a>
             </li>
-            <?php if(Security::getUser()['id_perfil'] != 1) : ?>
             <li class="mb-2">
                 <a href="../Telas/Novo_chamado.php" class="flex items-center p-2 text-gray-700 rounded-lg hover:bg-blue-50" id="newTicketLink">
                     <i class="fas fa-plus-circle mr-3"></i>
                     <span>Novo Chamado</span>
                 </a>
             </li>
-            <?php endif; ?>
             <?php if(Security::getUser()['id_perfil'] == 1) : ?>
             <li class="mb-2 " id="adminUsersLink">
                 <a href="../Telas/Gerenciar_usuario.php" class="flex items-center p-2 text-gray-700 rounded-lg hover:bg-blue-50">

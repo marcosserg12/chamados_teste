@@ -30,7 +30,48 @@
     <script src="../assets/js/custom/scripts/filepond.js"></script>
 
 
+    <!-- Select2 + Tema Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
+    <script>
+        $(document).ready(function() {
+            $('.select2').select2({
+                width: '100%' // importante para respeitar w-full
+            });
+        });
+    </script>
+
+
+
+
     <style>
+        .border-red-500 {
+            animation: shake 0.2s 2;
+        }
+
+        @keyframes shake {
+            0% {
+                transform: translateX(0);
+            }
+
+            25% {
+                transform: translateX(-4px);
+            }
+
+            50% {
+                transform: translateX(4px);
+            }
+
+            75% {
+                transform: translateX(-4px);
+            }
+
+            100% {
+                transform: translateX(0);
+            }
+        }
+
         .gradient-bg {
             background: linear-gradient(135deg, #6b73ff 0%, #000dff 100%);
         }

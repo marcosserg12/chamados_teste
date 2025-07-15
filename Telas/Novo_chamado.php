@@ -9,9 +9,91 @@ session_start();
 if (!Security::isAuthenticated()) {
     redirect('../index.php');
 }
+$chamado = new Chamados();
+$lista_tipo_chamado = $chamado->lista_tipos_chamados();
+$lista_empresas = $chamado->lista_empresas();
 
 
 $id_usuario = Security::getUser()['id_usuario']; ?>
+
+<style>
+    /* === SELECT PRINCIPAL COM ESTILO DE INPUT TAILWIND === */
+    .select2-container .select2-selection--single {
+        background-color: #fff;
+        border: 1px solid #d1d5db;
+        /* border-gray-300 */
+        border-radius: 0.375rem;
+        /* rounded-md */
+        padding: 0.5rem 0.75rem;
+        /* px-3 py-2 */
+        font-size: 0.875rem;
+        /* text-sm */
+        color: #111827;
+        /* text-gray-900 */
+        height: auto;
+        min-height: 2.5rem;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+        /* shadow-sm */
+        transition: border 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+    }
+
+    /* === COMPORTAMENTO DE FOCO (como input padrão do Tailwind) === */
+    .select2-container--default .select2-selection--single:focus,
+    .select2-container--default .select2-selection--single:focus-visible,
+    .select2-container--default .select2-selection--single:focus-within {
+        border-color: #3b82f6 !important;
+        /* border-blue-500 */
+        outline: none !important;
+        box-shadow: 0 0 0 3px rgba(59, 131, 246, 0.4);
+        /* ring-blue-500 */
+    }
+
+    /* === TEXTO DENTRO DO SELECT === */
+    .select2-selection__rendered {
+        line-height: 1.5rem;
+        color: #111827;
+        /* text-gray-900 */
+    }
+
+    /* === ÍCONE SETA === */
+    .select2-container--default .select2-selection--single .select2-selection__arrow {
+        height: 100%;
+        right: 0.75rem;
+    }
+
+    /* === DROPDOWN ESTILO TAILWIND === */
+    .select2-container .select2-dropdown {
+        border: 1px solid #d1d5db;
+        border-radius: 0.375rem;
+        background-color: #fff;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+        font-size: 0.875rem;
+    }
+
+    /* === OPÇÕES DA LISTA === */
+    .select2-container .select2-results__option {
+        padding: 0.5rem 0.75rem;
+        color: #374151;
+        /* text-gray-700 */
+        cursor: pointer;
+    }
+
+    /* Hover no item */
+    .select2-container .select2-results__option--highlighted {
+        background-color: rgba(88, 96, 255, 0.55) !important;
+        /* bg-gray-200 */
+        color: #111827 !important;
+        /* text-gray-900 */
+    }
+
+    /* Item selecionado */
+    .select2-container--default .select2-results__option--selected {
+        background-color: rgba(88, 96, 255, 0.30) !important;
+        /* bg-gray-100 */
+        color: #111827 !important;
+        /* text-gray-900 */
+    }
+</style>
 
 
 <body class="bg-gray-100 font-sans">
@@ -28,14 +110,92 @@ $id_usuario = Security::getUser()['id_usuario']; ?>
                     </button>
                 </div>
                 <div class="bg-white shadow rounded-lg p-6">
-                    <form id="form_novo_chamado" enctype="multipart/form-data">
+                    <form id="form_novo_chamado" enctype="multipart/form-data" novalidate>
                         <input hidden id="id_usuario" name="id_usuario" value="<?php echo $id_usuario; ?>">
                         <div class="mb-6">
-                            <label for="ticketTitle" class="block text-sm font-medium text-gray-700 mb-2">Título</label>
+                            <label for="ticketTitle" class="block text-sm font-medium text-gray-700 mb-2">Título <span class="text-red-500">*</span>
+                            </label>
                             <input type="text" id="ticketTitle" class="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md p-2 border" placeholder="Descreva o problema resumidamente" name="ds_titulo" required>
                         </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                            <!-- Select Empresa -->
+                            <div>
+                                <label for="empresa" class="block text-sm font-medium text-gray-700 mb-2">Empresa <span class="text-red-500">*</span>
+                                </label>
+                                <select id="empresa" name="id_empresa" class="select2 w-full border border-gray-300 rounded-md p-2" required>
+                                    <option value="">Selecione a empresa</option>
+                                    <?php foreach ($lista_empresas as $empresa) : ?>
+                                        <option value="<?= $empresa['id_empresa'] ?>"><?= $empresa['ds_empresa'] ?></option>
+                                    <?php endforeach; ?>
+                                </select>
+                            </div>
+
+                            <!-- Select Localização -->
+                            <div>
+                                <label for="localizacao" class="block text-sm font-medium text-gray-700 mb-2">Localização <span class="text-red-500">*</span>
+                                </label>
+                                <select id="localizacao" name="id_localizacao" class="select2 w-full border border-gray-300 rounded-md p-2" required>
+                                    <option value="">Selecione a localização</option>
+                                </select>
+                            </div>
+                        </div>
+
                         <div class="mb-6">
-                            <label for="ticketDescription" class="block text-sm font-medium text-gray-700 mb-2">Descrição</label>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Categoria do Chamado</label>
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <div>
+                                    <label for="tipo_chamado" class="block text-sm font-medium text-gray-700 mb-2">Tipo de Chamado <span class="text-red-500">*</span>
+                                    </label>
+                                    <select id="tipo_chamado" name="id_tipo_chamado" class="select2" required>
+                                        <option value="">Selecione o tipo</option>
+                                        <?php foreach ($lista_tipo_chamado as $tipo) : ?>
+                                            <option value="<?= $tipo['id_tipo_chamado'] ?>"><?= $tipo['ds_tipo_chamado'] ?></option>
+                                        <?php endforeach; ?>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label for="motivo_principal" class="block text-sm font-medium text-gray-700 mb-2">Motivo <span class="text-red-500">*</span>
+                                    </label>
+                                    <select id="motivo_principal" name="id_motivo_principal" class="select2" required>
+                                        <option value="">Selecione o motivo</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label for="motivo_associado" class="block text-sm font-medium text-gray-700 mb-2">Detalhamento <span class="text-red-500">*</span>
+                                    </label>
+                                    <select id="motivo_associado" name="id_motivo_associado" class="select2" required>
+                                        <option value="">Selecione o detalhe</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                        </div>
+
+                        <div class="mb-6" id="div_patrimonio" style="display: none;">
+                            <label for="ticketTitle" class="block text-sm font-medium text-gray-700 mb-2">
+                                Patrimônio
+                                <span class="ml-1 relative group cursor-pointer">
+                                    <i class="fas fa-info-circle text-blue-500"></i>
+                                    <div class="absolute z-10 hidden group-hover:block w-64 bg-white border border-gray-300 shadow-lg rounded-md p-4 mb-2 bottom-full left-1/2 -translate-x-1/2">
+                                        <img src="../assets/media/patrimonio.jpg" alt="Etiqueta de patrimônio" class="mb-2 rounded w-full h-auto border border-gray-200">
+                                        <p class="text-sm text-gray-700">
+                                            Encontre a etiqueta colada no item (como na imagem) e informe o número exatamente como aparece.
+                                        </p>
+                                    </div>
+                                </span>
+                            </label>
+
+                            <input type="text" id="ticketTitle" name="ds_patrimonio"
+                                class="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md p-2 border"
+                                placeholder="Digite o número do patrimônio">
+                        </div>
+
+
+
+                        <div class="mb-6">
+                            <label for="ticketDescription" class="block text-sm font-medium text-gray-700 mb-2">Descrição <span class="text-red-500">*</span>
+                            </label>
                             <textarea id="ticketDescription" rows="5" class="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md p-2 border" placeholder="Descreva o problema em detalhes..." required name="ds_descricao"></textarea>
                         </div>
                         <div class="mb-6">
@@ -67,6 +227,7 @@ $id_usuario = Security::getUser()['id_usuario']; ?>
             </div>
         </main>
     </div>
+
     <script>
         const input = document.getElementById('file-upload');
         const previewsContainer = document.getElementById('filePreviews');
@@ -160,6 +321,35 @@ $id_usuario = Security::getUser()['id_usuario']; ?>
         }
         $('#form_novo_chamado').on('submit', function(e) {
             e.preventDefault();
+
+            // Remove erros anteriores
+            $('#form_novo_chamado [required]').removeClass('border-red-500');
+            $('#form_novo_chamado .error-message').remove();
+
+            let isValid = true;
+
+            $('#form_novo_chamado [required]').each(function() {
+                const value = $(this).val()?.trim();
+
+                if (!value) {
+                    isValid = false;
+                    $(this).addClass('border-red-500');
+                    const isSelect2 = $(this).hasClass('select2');
+                    const errorMsg = '<p class="text-red-500 text-sm mt-1 error-message">Este campo é obrigatório.</p>';
+
+                    if (isSelect2) {
+                        $(this).next('.select2').after(errorMsg);
+                    } else {
+                        $(this).after(errorMsg);
+                    }
+                }
+            });
+
+            // Interrompe envio se estiver inválido
+            if (!isValid) {
+                return;
+            }
+
             var form = $('#form_novo_chamado')[0];
             var formData = new FormData(form);
 
@@ -172,7 +362,7 @@ $id_usuario = Security::getUser()['id_usuario']; ?>
             });
 
             $.ajax({
-                url: '../appChamado/gravar_chamado.php',
+                url: '../appNovoChamado/gravar_chamado.php',
                 type: 'POST',
                 data: formData,
                 processData: false,
@@ -189,5 +379,101 @@ $id_usuario = Security::getUser()['id_usuario']; ?>
                     console.error('Erro:', xhr.responseText);
                 }
             });
+        });
+
+
+        $(document).ready(function() {
+
+            // Quando escolher o tipo de chamado, carrega os motivos principais
+            $('#tipo_chamado').on('change', function() {
+                const idTipo = $(this).val();
+
+                if (idTipo === "1") {
+                    $('#div_patrimonio').show(); // ou .removeClass('hidden')
+                } else {
+                    $('#div_patrimonio').hide(); // ou .addClass('hidden')
+                }
+
+                $('#motivo_principal').html('<option value="">Carregando...</option>');
+                $('#motivo_associado').html('<option value="">Selecione o detalhe</option>');
+
+                if (idTipo) {
+                    $.ajax({
+                        url: '../appNovoChamado/carrega_motivo.php',
+                        data: {
+                            id_tipo_chamado: idTipo
+                        },
+                        type: 'GET',
+                        dataType: 'json',
+                        success: function(data) {
+                            let options = '<option value="">Selecione o motivo</option>';
+                            data.forEach(function(item) {
+                                options += `<option value="${item.id_motivo_principal}">${item.ds_descricao}</option>`;
+                            });
+                            $('#motivo_principal').html(options).trigger('change.select2');
+                        },
+                        error: function() {
+                            alert('Erro ao carregar os motivos.');
+                        }
+                    });
+                }
+            });
+
+            // Quando escolher o motivo principal, carrega os associados
+            $('#motivo_principal').on('change', function() {
+                const idMotivo = $(this).val();
+
+                $('#motivo_associado').html('<option value="">Carregando...</option>');
+
+                if (idMotivo) {
+                    $.ajax({
+                        url: '../appNovoChamado/carrega_motivo_associado.php',
+                        data: {
+                            id_motivo_principal: idMotivo
+                        },
+                        type: 'GET',
+                        dataType: 'json',
+                        success: function(data) {
+                            let options = '<option value="">Selecione o detalhe</option>';
+                            data.forEach(function(item) {
+                                options += `<option value="${item.id_motivo_principal}">${item.ds_descricao_motivo}</option>`;
+                            });
+                            $('#motivo_associado').html(options).trigger('change.select2');
+                        },
+                        error: function() {
+                            alert('Erro ao carregar os detalhes.');
+                        }
+                    });
+                }
+            });
+
+            $('#empresa').on('change', function() {
+                const idEmpresa = $(this).val();
+                $('#localizacao').html('<option value="">Carregando...</option>');
+
+                if (idEmpresa) {
+                    $.ajax({
+                        url: '../appNovoChamado/carrega_localizacao.php',
+                        data: {
+                            id_empresa: idEmpresa
+                        },
+                        type: 'GET',
+                        dataType: 'json',
+                        success: function(data) {
+                            let options = '<option value="">Selecione a localização</option>';
+                            data.forEach(function(item) {
+                                options += `<option value="${item.id_localizacao}">${item.ds_localizacao}</option>`;
+                            });
+                            $('#localizacao').html(options).trigger('change.select2');
+                        },
+                        error: function() {
+                            alert('Erro ao carregar as localizações.');
+                        }
+                    });
+                } else {
+                    $('#localizacao').html('<option value="">Selecione a localização</option>').trigger('change.select2');
+                }
+            });
+
         });
     </script>

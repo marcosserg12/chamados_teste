@@ -88,12 +88,24 @@ class Chamados
                     id_usuario,
                     ds_titulo,
                     ds_descricao,
-                    dt_data_chamado
+                    dt_data_chamado,
+                    id_empresa,
+                    id_localizacao,
+                    id_tipo_chamado,
+                    id_motivo_principal,
+                    id_motivo_associado,
+                    ds_patrimonio
                 ) VALUES (
                     :id_usuario,
                     :ds_titulo,
                     :ds_descricao,
-                    :dt_data_chamado
+                    :dt_data_chamado,
+                    :id_empresa,
+                    :id_localizacao,
+                    :id_tipo_chamado,
+                    :id_motivo_principal,
+                    :id_motivo_associado,
+                    :ds_patrimonio
                 );
             ";
 
@@ -104,6 +116,12 @@ class Chamados
             ':ds_titulo' => $dados['ds_titulo'],
             ':ds_descricao' => $dados['ds_descricao'],
             ':dt_data_chamado' => date('Y-m-d H:i:s'),
+            ':id_empresa' => $dados['id_empresa'],
+            ':id_localizacao' => $dados['id_localizacao'],
+            ':id_tipo_chamado' => $dados['id_tipo_chamado'],
+            ':id_motivo_principal' => $dados['id_motivo_principal'],
+            ':id_motivo_associado' => $dados['id_motivo_associado'],
+            ':ds_patrimonio' => $dados['ds_patrimonio']
         ]);
         $id_chamado = $connection->lastInsertId();
         $this->salvarArquivosChamado($id_chamado);
@@ -217,10 +235,11 @@ class Chamados
     {
         $con = Conecta::getConexao();
 
-        $select = "SELECT c.*,u1.ds_nome as criador,u2.ds_nome as designado,rl.dt_aceito,rl.id_usuario as id_usuario_designado FROM tb_chamados c
+        $select = "SELECT c.*,u1.ds_nome as criador,u2.ds_nome as designado,rl.dt_aceito,rl.id_usuario as id_usuario_designado,hc.dt_update FROM tb_chamados c
         left join tb_usuario u1 on u1.id_usuario = c.id_usuario
         left join rl_chamado_usuario rl on rl.id_chamado = c.id_chamado
         left join tb_usuario u2 on u2.id_usuario = rl.id_usuario
+        left join (select id_chamado,dt_update from tb_historico_status_chamado order by dt_update desc limit 1)  hc on c.id_chamado = hc.id_chamado
         where c.id_chamado = :id_chamado";
 
         $stmt = $con->prepare($select);
@@ -292,66 +311,82 @@ class Chamados
         $con = Conecta::getConexao();
 
         $select = "SELECT
-                hu.id_historico AS id,
-                hu.id_chamado,
-                hu.id_usuario_adm AS id_usuario,
-                hu.id_usuario_desginado,
-                NULL AS ds_comentario,
-                NULL AS st_status,
-                CAST(hu.dt_update AS DATETIME) AS dt_evento,
-                'usuario_chamado' AS origem,
-                u_adm.ds_nome AS ds_nome_usuario,
-                u_desig.ds_nome AS ds_nome_usuario_designado
-            FROM tb_historico_usuario_chamado hu
-            LEFT JOIN tb_usuario u_adm ON hu.id_usuario_adm = u_adm.id_usuario
-            LEFT JOIN tb_usuario u_desig ON hu.id_usuario_desginado = u_desig.id_usuario
-            WHERE hu.id_chamado = :id_chamado
+            hu.id_historico AS id,
+            hu.id_chamado,
+            hu.id_usuario_adm AS id_usuario,
+            hu.id_usuario_desginado,
+            NULL AS ds_comentario,
+            NULL AS st_status,
+            CAST(hu.dt_update AS DATETIME) AS dt_evento,
+            'usuario_chamado' AS origem,
+            u_adm.ds_nome AS ds_nome_usuario,
+            u_desig.ds_nome AS ds_nome_usuario_designado
+        FROM tb_historico_usuario_chamado hu
+        LEFT JOIN tb_usuario u_adm ON hu.id_usuario_adm = u_adm.id_usuario
+        LEFT JOIN tb_usuario u_desig ON hu.id_usuario_desginado = u_desig.id_usuario
+        WHERE hu.id_chamado = :id_chamado
 
-            UNION ALL
+        UNION ALL
 
-            SELECT
-                hs.id_historico AS id,
-                hs.id_chamado,
-                hs.id_usuario,
-                NULL AS id_usuario_desginado,
-                NULL AS ds_comentario,
-                hs.st_status,
-                CAST(hs.dt_update AS DATETIME) AS dt_evento,
-                'status_chamado' AS origem,
-                u.ds_nome AS ds_nome_usuario,
-                NULL AS ds_nome_usuario_designado
-            FROM tb_historico_status_chamado hs
-            LEFT JOIN tb_usuario u ON hs.id_usuario = u.id_usuario
-            WHERE hs.id_chamado = :id_chamado
+        SELECT
+            hs.id_historico AS id,
+            hs.id_chamado,
+            hs.id_usuario,
+            NULL AS id_usuario_desginado,
+            NULL AS ds_comentario,
+            hs.st_status,
+            CAST(hs.dt_update AS DATETIME) AS dt_evento,
+            'status_chamado' AS origem,
+            u.ds_nome AS ds_nome_usuario,
+            NULL AS ds_nome_usuario_designado
+        FROM tb_historico_status_chamado hs
+        LEFT JOIN tb_usuario u ON hs.id_usuario = u.id_usuario
+        WHERE hs.id_chamado = :id_chamado
 
-            UNION ALL
+        UNION ALL
 
-            SELECT
-                cc.id_comentario_chamado AS id,
-                cc.id_chamado,
-                cc.id_usuario,
-                NULL AS id_usuario_desginado,
-                cc.ds_comentario,
-                NULL AS st_status,
-                CAST(cc.dt_comentario AS DATETIME) AS dt_evento,
-                'comentario_chamado' AS origem,
-                u.ds_nome AS ds_nome_usuario,
-                NULL AS ds_nome_usuario_designado
-            FROM tb_comentario_chamado cc
-            LEFT JOIN tb_usuario u ON cc.id_usuario = u.id_usuario
-            WHERE cc.id_chamado = :id_chamado
+        SELECT
+            cc.id_comentario_chamado AS id,
+            cc.id_chamado,
+            cc.id_usuario,
+            NULL AS id_usuario_desginado,
+            cc.ds_comentario,
+            NULL AS st_status,
+            CAST(cc.dt_comentario AS DATETIME) AS dt_evento,
+            'comentario_chamado' AS origem,
+            u.ds_nome AS ds_nome_usuario,
+            NULL AS ds_nome_usuario_designado
+        FROM tb_comentario_chamado cc
+        LEFT JOIN tb_usuario u ON cc.id_usuario = u.id_usuario
+        WHERE cc.id_chamado = :id_chamado
 
-            ORDER BY dt_evento;
-            ";
+        UNION ALL
+
+        SELECT
+            he.id_historico AS id,
+            he.id_chamado,
+            he.id_usuario,
+            NULL AS id_usuario_desginado,
+            NULL AS ds_comentario,
+            NULL AS st_status,
+            CAST(he.dt_update AS DATETIME) AS dt_evento,
+            'edicao_chamado' AS origem,
+            u.ds_nome AS ds_nome_usuario,
+            NULL AS ds_nome_usuario_designado
+        FROM tb_historico_edicao he
+        LEFT JOIN tb_usuario u ON he.id_usuario = u.id_usuario
+        WHERE he.id_chamado = :id_chamado
+
+        ORDER BY dt_evento;
+    ";
 
         $stmt = $con->prepare($select);
-
-
         $stmt->execute([':id_chamado' => $id_chamado]);
         $dados = $stmt->fetchAll();
 
         return $dados;
     }
+
 
     function atribuirFuncoesUsuario(array $dados)
     {
@@ -537,5 +572,156 @@ class Chamados
         $resultado = $stmt->fetch(PDO::FETCH_ASSOC);
 
         return $resultado ? $resultado['nu_telefone'] : null;
+    }
+    function lista_tipos_chamados()
+    {
+        $con = Conecta::getConexao();
+
+        $select = "SELECT * FROM tb_tipo_chamado;";
+
+        $stmt = $con->prepare($select);
+
+
+        $stmt->execute();
+        $dados = $stmt->fetchAll();
+
+        return $dados;
+    }
+    function lista_motivo($id_tipo_chamado)
+    {
+        $con = Conecta::getConexao();
+
+        $select = "SELECT * FROM tb_motivo_principal where id_tipo_chamado = :id_tipo_chamado
+            ";
+
+        $stmt = $con->prepare($select);
+
+
+        $stmt->execute([':id_tipo_chamado' => $id_tipo_chamado]);
+        $dados = $stmt->fetchAll();
+
+        return $dados;
+    }
+    function lista_motivo_associado($id_motivo_principal)
+    {
+        $con = Conecta::getConexao();
+
+        $select = "SELECT * FROM tb_motivo_associado where id_motivo_principal = :id_motivo_principal
+            ";
+
+        $stmt = $con->prepare($select);
+
+
+        $stmt->execute([':id_motivo_principal' => $id_motivo_principal]);
+        $dados = $stmt->fetchAll();
+
+        return $dados;
+    }
+
+    function lista_empresas()
+    {
+        $con = Conecta::getConexao();
+
+        $select = "SELECT * FROM tb_empresa;";
+
+        $stmt = $con->prepare($select);
+
+
+        $stmt->execute();
+        $dados = $stmt->fetchAll();
+
+        return $dados;
+    }
+    function lista_localizacao($id_empresa)
+    {
+        $con = Conecta::getConexao();
+
+        $select = "SELECT * FROM tb_localizacao l
+        inner join rl_empresa_localizacao rl on l.id_localizacao = rl.id_localizacao
+        where rl.id_empresa = :id_empresa
+            ";
+
+        $stmt = $con->prepare($select);
+
+
+        $stmt->execute([':id_empresa' => $id_empresa]);
+        $dados = $stmt->fetchAll();
+
+        return $dados;
+    }
+    public function buscarArquivo($id_arquivo)
+    {
+        $con = Conecta::getConexao();
+        $stmt = $con->prepare("SELECT * FROM rl_arquivo_chamado WHERE id_arquivo = :id");
+        $stmt->execute([':id' => $id_arquivo]);
+        return $stmt->fetch();
+    }
+    public function excluirArquivo($id_arquivo)
+    {
+        $con = Conecta::getConexao();
+        $stmt = $con->prepare("DELETE FROM rl_arquivo_chamado WHERE id_arquivo = :id");
+        return $stmt->execute([':id' => $id_arquivo]);
+    }
+    public function editarChamado(array $dados)
+    {
+        $connection = Conecta::getConexao();
+
+        $sql = "
+        UPDATE tb_chamados
+        SET
+            id_usuario = :id_usuario,
+            ds_titulo = :ds_titulo,
+            ds_descricao = :ds_descricao,
+            id_empresa = :id_empresa,
+            id_localizacao = :id_localizacao,
+            id_tipo_chamado = :id_tipo_chamado,
+            id_motivo_principal = :id_motivo_principal,
+            id_motivo_associado = :id_motivo_associado,
+            ds_patrimonio = :ds_patrimonio
+        WHERE id_chamado = :id_chamado
+    ";
+
+        $stmt = $connection->prepare($sql);
+        $stmt->execute([
+            ':id_chamado' => $dados['id_chamado'],
+            ':id_usuario' => $dados['id_usuario'],
+            ':ds_titulo' => $dados['ds_titulo'],
+            ':ds_descricao' => $dados['ds_descricao'],
+            ':id_empresa' => $dados['id_empresa'],
+            ':id_localizacao' => $dados['id_localizacao'],
+            ':id_tipo_chamado' => $dados['id_tipo_chamado'],
+            ':id_motivo_principal' => $dados['id_motivo_principal'],
+            ':id_motivo_associado' => $dados['id_motivo_associado'],
+            ':ds_patrimonio' => $dados['ds_patrimonio']
+        ]);
+
+        $this->salvarArquivosChamado($dados['id_chamado']);
+        $this->cadastrarHistoricoEdicao($dados);
+
+        return true;
+    }
+    function cadastrarHistoricoEdicao(array $dados): void
+    {
+        $connection = Conecta::getConexao();
+
+        $sql = "
+                INSERT INTO tb_historico_edicao(
+                    id_chamado,
+                    id_usuario,
+                    dt_update
+                ) VALUES (
+                    :id_chamado,
+                    :id_usuario,
+                    :dt_update
+                );
+            ";
+
+
+        $stmt = $connection->prepare($sql);
+        $stmt->execute([
+            ':id_chamado' => $dados['id_chamado'],
+            ':id_usuario' => $dados['id_usuario'],
+            ':dt_update' => date('Y-m-d H:i:s'),
+        ]);
     }
 }
