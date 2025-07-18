@@ -7,7 +7,7 @@
 
                 <!-- Tooltip com imagem pequena -->
                 <div class="absolute right-0 mt-2 w-[400px] p-4 bg-white border border-gray-300 rounded-lg shadow-xl z-50 hidden group-hover:block group-focus:block">
-                    <img src="../assets/media/regra_chamados.jpg" alt="Como funciona o tempo de resposta" class="w-full rounded cursor-pointer"  />
+                    <img src="../assets/media/regra_chamados.jpg" alt="Como funciona o tempo de resposta" class="w-full rounded cursor-pointer" />
                     <p class="text-sm text-gray-600 mt-2">Clique no <b>?</b> para ver ampliada.</p>
                 </div>
             </div>
@@ -58,5 +58,126 @@
         pageTitle.textContent = 'Dashboard';
     } else {
         pageTitle.textContent = '';
+    }
+</script>
+
+<style>
+    /* === SELECT PRINCIPAL COM ESTILO DE INPUT TAILWIND === */
+    .select2-container .select2-selection--single {
+        background-color: #fff;
+        border: 1px solid #d1d5db;
+        /* border-gray-300 */
+        border-radius: 0.375rem;
+        /* rounded-md */
+        padding: 0.5rem 0.75rem;
+        /* px-3 py-2 */
+        font-size: 0.875rem;
+        /* text-sm */
+        color: #111827;
+        /* text-gray-900 */
+        height: auto;
+        min-height: 2.5rem;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+        /* shadow-sm */
+        transition: border 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+    }
+
+    /* === COMPORTAMENTO DE FOCO (como input padrão do Tailwind) === */
+    .select2-container--default .select2-selection--single:focus,
+    .select2-container--default .select2-selection--single:focus-visible,
+    .select2-container--default .select2-selection--single:focus-within {
+        border-color: #3b82f6 !important;
+        /* border-blue-500 */
+        outline: none !important;
+        box-shadow: 0 0 0 3px rgba(59, 131, 246, 0.4);
+        /* ring-blue-500 */
+    }
+
+    /* === TEXTO DENTRO DO SELECT === */
+    .select2-selection__rendered {
+        line-height: 1.5rem;
+        color: #111827;
+        /* text-gray-900 */
+    }
+
+    /* === ÍCONE SETA === */
+    .select2-container--default .select2-selection--single .select2-selection__arrow {
+        height: 100%;
+        right: 0.75rem;
+    }
+
+    /* === DROPDOWN ESTILO TAILWIND === */
+    .select2-container .select2-dropdown {
+        border: 1px solid #d1d5db;
+        border-radius: 0.375rem;
+        background-color: #fff;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+        font-size: 0.875rem;
+    }
+
+    /* === OPÇÕES DA LISTA === */
+    .select2-container .select2-results__option {
+        padding: 0.5rem 0.75rem;
+        color: #374151;
+        /* text-gray-700 */
+        cursor: pointer;
+    }
+
+    /* Hover no item */
+    .select2-container .select2-results__option--highlighted {
+        background-color: rgba(88, 96, 255, 0.55) !important;
+        /* bg-gray-200 */
+        color: #111827 !important;
+        /* text-gray-900 */
+    }
+
+    /* Item selecionado */
+    .select2-container--default .select2-results__option--selected {
+        background-color: rgba(88, 96, 255, 0.30) !important;
+        /* bg-gray-100 */
+        color: #111827 !important;
+        /* text-gray-900 */
+    }
+</style>
+<script>
+    function validarFormulario(formSelector) {
+        const $form = $(formSelector);
+        let isValid = true;
+        const validatedRadios = [];
+
+        $form.find('.error-message').remove(); // limpa mensagens anteriores
+        $form.find('.border-red-500').removeClass('border-red-500');
+
+        $form.find('[required]').each(function() {
+            const name = $(this).attr('name');
+            const type = $(this).attr('type');
+
+            if (type === 'radio') {
+                if (validatedRadios.includes(name)) return;
+                validatedRadios.push(name);
+
+                if ($(`input[name="${name}"]:checked`).length === 0) {
+                    isValid = false;
+                    const group = $(`input[name="${name}"]`).last().parent().parent();
+                    group.after('<p class="text-red-500 text-sm mt-1 error-message">Este campo é obrigatório.</p>');
+                }
+            } else {
+                const value = $(this).val()?.trim();
+                if (!value) {
+                    isValid = false;
+                    $(this).addClass('border-red-500');
+                    const isSelect2 = $(this).hasClass('select2');
+                    const errorMsg = '<p class="text-red-500 text-sm mt-1 error-message">Este campo é obrigatório.</p>';
+
+                    if (isSelect2) {
+                        $(this).next('.select2').after(errorMsg);
+                    } else {
+                        $(this).after(errorMsg);
+                    }
+                }
+            }
+        });
+
+        return isValid;
     }
 </script>

@@ -620,6 +620,21 @@ class Chamados
 
         return $dados;
     }
+    function lista_motivo_associado_empresa($id_motivo_principal,$id_empresa)
+    {
+        $con = Conecta::getConexao();
+
+        $select = "SELECT * FROM tb_motivo_associado where id_motivo_principal = :id_motivo_principal and id_empresa = :id_empresa
+            ";
+
+        $stmt = $con->prepare($select);
+
+
+        $stmt->execute([':id_motivo_principal' => $id_motivo_principal , ':id_empresa' => $id_empresa]);
+        $dados = $stmt->fetchAll();
+
+        return $dados;
+    }
 
     function lista_empresas()
     {
@@ -631,6 +646,22 @@ class Chamados
 
 
         $stmt->execute();
+        $dados = $stmt->fetchAll();
+
+        return $dados;
+    }
+    function lista_empresas_usuario($id_usuario)
+    {
+        $con = Conecta::getConexao();
+
+        $select = "SELECT distinct e.id_empresa,e.ds_empresa FROM tb_empresa e
+        inner join rl_usuario_empresa_localizacao rl on rl.id_empresa = e.id_empresa
+        where rl.id_usuario = :id_usuario";
+
+        $stmt = $con->prepare($select);
+
+
+        $stmt->execute([':id_usuario' => $id_usuario]);
         $dados = $stmt->fetchAll();
 
         return $dados;
@@ -648,6 +679,23 @@ class Chamados
 
 
         $stmt->execute([':id_empresa' => $id_empresa]);
+        $dados = $stmt->fetchAll();
+
+        return $dados;
+    }
+    function lista_localizacao_usuario($id_empresa,$id_usuario)
+    {
+        $con = Conecta::getConexao();
+
+        $select = "SELECT l.*,rl.id_empresa FROM tb_localizacao l
+        inner join rl_usuario_empresa_localizacao rl on rl.id_localizacao = l.id_localizacao
+        where rl.id_empresa = :id_empresa and id_usuario = :id_usuario
+            ";
+
+        $stmt = $con->prepare($select);
+
+
+        $stmt->execute([':id_empresa' => $id_empresa,':id_usuario' => $id_usuario]);
         $dados = $stmt->fetchAll();
 
         return $dados;

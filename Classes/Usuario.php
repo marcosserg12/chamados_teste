@@ -157,8 +157,8 @@ class Usuario
         $ds_email       = $dados['ds_email'];
         $st_ativo      = 'A';
         $nu_telefone = preg_replace('/\D/', '', $dados['nu_telefone']);
-        $nu_cep = preg_replace('/\D/', '', $dados['nu_cep']);
-        $ds_endereco = $dados['ds_endereco'];
+        // $nu_cep = preg_replace('/\D/', '', $dados['nu_cep']);
+        // $ds_endereco = $dados['ds_endereco'];
 
         $con = Conecta::getConexao();
         $insert = "INSERT into tb_usuario (
@@ -168,8 +168,8 @@ class Usuario
                             ds_email,
                             st_ativo,
                             nu_telefone,
-                            nu_cep,
-                            ds_endereco,
+                            -- nu_cep,
+                            -- ds_endereco,
                             st_reset_senha,
                             dt_insert,
                             ds_senha
@@ -181,8 +181,8 @@ class Usuario
 							:ds_email,
 							:st_ativo,
                             :nu_telefone,
-                            :nu_cep,
-                            :ds_endereco,
+                            -- :nu_cep,
+                            -- :ds_endereco,
                             1,
                             NOW(),
                             :ds_senha
@@ -197,27 +197,61 @@ class Usuario
             ':ds_email' => $ds_email,
             ':st_ativo' => $st_ativo,
             ':nu_telefone' => $nu_telefone,
-            ':nu_cep' => $nu_cep,
-            ':ds_endereco' => $ds_endereco,
+            // ':nu_cep' => $nu_cep,
+            // ':ds_endereco' => $ds_endereco,
             ':ds_senha' =>  hash("SHA512", $ds_senha)
 
         );
 
         $stmt->execute($params);
+
+        $id_usuario = $con->lastInsertId();
+
+        if (!empty($dados['vinculos'])) {
+            $this->gravarVinculosEmpresaLocalizacao($id_usuario, $dados['vinculos']);
+        }
+        return $id_usuario;
     }
+    public function gravarVinculosEmpresaLocalizacao($id_usuario, array $vinculos)
+    {
+        $con = Conecta::getConexao();
+
+        // Evita duplicidade (opcional, mas recomendado)
+        $con->prepare("DELETE FROM rl_usuario_empresa_localizacao WHERE id_usuario = ?")
+            ->execute([$id_usuario]);
+
+        // Prepara o insert
+        $stmt = $con->prepare("
+        INSERT INTO rl_usuario_empresa_localizacao (id_usuario, id_empresa, id_localizacao)
+        VALUES (?, ?, ?)
+    ");
+
+        foreach ($vinculos as $v) {
+            if (strpos($v, '-') === false) continue; // segurança
+
+            list($id_empresa, $id_localizacao) = explode('-', $v);
+            $stmt->execute([
+                (int)$id_usuario,
+                (int)$id_empresa,
+                (int)$id_localizacao
+            ]);
+        }
+    }
+
+
 
 
     public function alterar(array $dados)
     {
-        $id_usuario     = intval($dados['edit_id_usuario']);
-        $ds_nome        = $dados['edit_ds_nome'];
-        $ds_usuario     = $dados['edit_ds_usuario'];
-        $ds_email       = $dados['edit_ds_email'];
-        $id_perfil      = $dados['edit_id_perfil'];
-        $nu_telefone    = preg_replace('/\D/', '', $dados['edit_nu_telefone']);
-        $nu_cep         = preg_replace('/\D/', '', $dados['edit_nu_cep']);
-        $ds_endereco    = $dados['edit_ds_endereco'];
-        $ds_senha       = $dados['edit_ds_senha'];
+        $id_usuario     = intval($dados['id_usuario']);
+        $ds_nome        = $dados['ds_nome'];
+        $ds_usuario     = $dados['ds_usuario'];
+        $ds_email       = $dados['ds_email'];
+        $id_perfil      = $dados['id_perfil'];
+        $nu_telefone    = preg_replace('/\D/', '', $dados['nu_telefone']);
+        // $nu_cep         = preg_replace('/\D/', '', $dados['nu_cep']);
+        // $ds_endereco    = $dados['ds_endereco'];
+        $ds_senha       = $dados['ds_senha'];
 
         $con = Conecta::getConexao();
 
@@ -227,8 +261,8 @@ class Usuario
                     ds_email = :ds_email,
                     id_perfil = :id_perfil,
                     nu_telefone = :nu_telefone,
-                    nu_cep = :nu_cep,
-                    ds_endereco = :ds_endereco,
+                    -- nu_cep = :nu_cep,
+                    -- ds_endereco = :ds_endereco,
                     st_reset_senha = 1,
                     ds_senha = :ds_senha,
                     dt_update = NOW()
@@ -242,13 +276,17 @@ class Usuario
             ':ds_email' => $ds_email,
             ':id_perfil' => $id_perfil,
             ':nu_telefone' => $nu_telefone,
-            ':nu_cep' => $nu_cep,
-            ':ds_endereco' => $ds_endereco,
+            // ':nu_cep' => $nu_cep,
+            // ':ds_endereco' => $ds_endereco,
             ':ds_senha' => hash('SHA512', $ds_senha),
             ':id_usuario' => $id_usuario
         ];
 
         $stmt->execute($params);
+
+        if (!empty($dados['vinculos'])) {
+            $this->gravarVinculosEmpresaLocalizacao($id_usuario, $dados['vinculos']);
+        }
     }
 
     public function alterarDadosUsuario($id_usuario, array $dados)
@@ -541,5 +579,37 @@ class Usuario
         $dados = $stmt->fetchAll();
 
         return $dados;
+    }
+    function listaPerfil()
+    {
+        $con = Conecta::getConexao();
+
+        $select = "SELECT * from tb_perfil order by ds_perfil asc";
+
+        $stmt = $con->prepare($select);
+
+
+        $stmt->execute();
+        $dados = $stmt->fetchAll();
+
+        return $dados;
+    }
+
+    public function buscarEmpresasELocalizacoesVinculadas($id_usuario)
+    {
+        $con = Conecta::getConexao();
+
+        $sql = "SELECT
+                id_empresa,
+                id_localizacao
+            FROM
+                rl_usuario_empresa_localizacao
+            WHERE
+                id_usuario = :id_usuario";
+
+        $stmt = $con->prepare($sql);
+        $stmt->execute([':id_usuario' => $id_usuario]);
+
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 }

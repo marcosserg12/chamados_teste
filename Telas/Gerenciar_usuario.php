@@ -29,9 +29,12 @@ $dados = $usuario->lista();
             <div id="adminUsersView">
                 <div class="flex justify-between items-center mb-6">
                     <h2 class="text-2xl font-semibold text-gray-800">Gerenciar Usuários</h2>
-                    <button id="addNewUserBtn" type="button" class="gradient-bg text-white px-4 py-2 rounded-md flex items-center" data-bs-toggle="modal" data-bs-target="#addUserModal">
+                    <a href="Adicionar_usuario.php" type="button" class="gradient-bg text-white px-4 py-2 rounded-md flex items-center">
                         <i class="fas fa-user-plus mr-2"></i> Novo Usuário
-                    </button>
+                    </a>
+                    <!-- <button id="addNewUserBtn" type="button" class="gradient-bg text-white px-4 py-2 rounded-md flex items-center" data-bs-toggle="modal" data-bs-target="#addUserModal">
+                        <i class="fas fa-user-plus mr-2"></i> Novo Usuário
+                    </button> -->
                 </div>
                 <div class="bg-white shadow rounded-lg overflow-hidden">
                     <div class="p-4 border-b border-gray-200">
@@ -124,7 +127,7 @@ $dados = $usuario->lista();
                     render: function(data, type, full, meta) {
                         if (full[4] == 'A') {
                             return `
-        <a href="#" class="btn btn-sm btn-outline-primary me-1 btn-editar2" title="Alterar Cadastro" data-usuario="${full[0]}" >
+        <a href="Editar_usuario?id_usuario=${full[0]}" class="btn btn-sm btn-outline-primary me-1 btn-editar2" title="Alterar Cadastro" data-usuario="${full[0]}" >
             <i class="bi bi-pencil-square"></i>
         </a>
         <a href="#" class="btn btn-sm btn-outline-danger btn-excluir" title="Inativar" data-usuario="${full[0]}" data-status="I">
@@ -132,7 +135,7 @@ $dados = $usuario->lista();
         </a>`;
                         } else if (full[4] == 'I') {
                             return `
-        <a href="#" class="btn btn-sm btn-outline-primary me-1 btn-editar2" title="Alterar Cadastro" data-usuario="${full[0]}">
+        <a href="Editar_usuario?id_usuario=${$full[0]}" class="btn btn-sm btn-outline-primary me-1 btn-editar2" title="Alterar Cadastro" data-usuario="${full[0]}">
             <i class="bi bi-pencil-square"></i>
         </a>
         <a href="#" class="btn btn-sm btn-outline-success btn-excluir" title="Ativar" data-usuario="${full[0]}" data-status="A">
@@ -140,7 +143,7 @@ $dados = $usuario->lista();
         </a>`;
                         } else {
                             return `
-        <a href="#" class="btn btn-sm btn-outline-primary me-1 btn-editar2" title="Alterar Cadastro" data-usuario="${full[0]}" >
+        <a href="Editar_usuario?id_usuario=${$full[0]}" class="btn btn-sm btn-outline-primary me-1 btn-editar2" title="Alterar Cadastro" data-usuario="${full[0]}" >
             <i class="bi bi-pencil-square"></i>
         </a>
         <a href="#" class="btn btn-sm btn-outline-danger btn-excluir" title="Inativar" data-usuario="${full[0]}" data-status="I">
@@ -148,6 +151,31 @@ $dados = $usuario->lista();
         </a>`;
                         }
                     }
+        //                     return `
+        // <a href="#" class="btn btn-sm btn-outline-primary me-1 btn-editar2" title="Alterar Cadastro" data-usuario="${full[0]}" >
+        //     <i class="bi bi-pencil-square"></i>
+        // </a>
+        // <a href="#" class="btn btn-sm btn-outline-danger btn-excluir" title="Inativar" data-usuario="${full[0]}" data-status="I">
+        //     <i class="bi bi-slash-circle"></i>
+        // </a>`;
+        //                 } else if (full[4] == 'I') {
+        //                     return `
+        // <a href="#" class="btn btn-sm btn-outline-primary me-1 btn-editar2" title="Alterar Cadastro" data-usuario="${full[0]}">
+        //     <i class="bi bi-pencil-square"></i>
+        // </a>
+        // <a href="#" class="btn btn-sm btn-outline-success btn-excluir" title="Ativar" data-usuario="${full[0]}" data-status="A">
+        //     <i class="bi bi-check-circle"></i>
+        // </a>`;
+        //                 } else {
+        //                     return `
+        // <a href="#" class="btn btn-sm btn-outline-primary me-1 btn-editar2" title="Alterar Cadastro" data-usuario="${full[0]}" >
+        //     <i class="bi bi-pencil-square"></i>
+        // </a>
+        // <a href="#" class="btn btn-sm btn-outline-danger btn-excluir" title="Inativar" data-usuario="${full[0]}" data-status="I">
+        //     <i class="bi bi-slash-circle"></i>
+        // </a>`;
+        //                 }
+        //             }
 
                 },
                 {
@@ -208,37 +236,37 @@ $dados = $usuario->lista();
             });
         });
 
-        $(document).on("click", ".btn-editar2", function() {
-            // e.preventDefault();
+        // $(document).on("click", ".btn-editar2", function() {
+        //     // e.preventDefault();
 
-            const userId = $(this).data('usuario');
+        //     const userId = $(this).data('usuario');
 
-            $.ajax({
-                url: '../appUsuario/buscar_usuario.php',
-                type: 'GET',
-                data: {
-                    id: userId
-                },
-                dataType: 'json',
-                success: function(response) {
-                    const data = response.data;
+        //     $.ajax({
+        //         url: '../appUsuario/buscar_usuario.php',
+        //         type: 'GET',
+        //         data: {
+        //             id: userId
+        //         },
+        //         dataType: 'json',
+        //         success: function(response) {
+        //             const data = response.data;
 
-                    $('#edit_userName').val(data.ds_nome);
-                    $('#edit_userLogin').val(data.ds_usuario);
-                    $('#edit_userEmail').val(data.ds_email);
-                    $('#edit_userPhone').val(data.nu_telefone);
-                    $('#edit_userCep').val(data.nu_cep);
-                    $('#edit_userAddress').val(data.ds_endereco);
-                    $('#edit_userType').val(data.id_perfil);
-                    $('#edit_userPassword').val('');
-                    $('#edit_id_usuario').val(data.id_usuario);
+        //             $('#edit_userName').val(data.ds_nome);
+        //             $('#edit_userLogin').val(data.ds_usuario);
+        //             $('#edit_userEmail').val(data.ds_email);
+        //             $('#edit_userPhone').val(data.nu_telefone);
+        //             $('#edit_userCep').val(data.nu_cep);
+        //             $('#edit_userAddress').val(data.ds_endereco);
+        //             $('#edit_userType').val(data.id_perfil);
+        //             $('#edit_userPassword').val('');
+        //             $('#edit_id_usuario').val(data.id_usuario);
 
-                    $('#editUserModal').modal('show');
-                },
-                error: function(xhr) {
-                    const msg = xhr.responseJSON?.message || 'Erro ao buscar dados do usuário.';
-                    swal.fire("Erro", msg, "error");
-                }
-            });
-        });
+        //             $('#editUserModal').modal('show');
+        //         },
+        //         error: function(xhr) {
+        //             const msg = xhr.responseJSON?.message || 'Erro ao buscar dados do usuário.';
+        //             swal.fire("Erro", msg, "error");
+        //         }
+        //     });
+        // });
     </script>

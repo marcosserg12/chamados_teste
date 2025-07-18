@@ -10,90 +10,12 @@ if (!Security::isAuthenticated()) {
     redirect('../index.php');
 }
 $chamado = new Chamados();
+$id_usuario = Security::getUser()['id_usuario'];
 $lista_tipo_chamado = $chamado->lista_tipos_chamados();
-$lista_empresas = $chamado->lista_empresas();
+$lista_empresas = $chamado->lista_empresas_usuario($id_usuario);
 
 
 $id_usuario = Security::getUser()['id_usuario']; ?>
-
-<style>
-    /* === SELECT PRINCIPAL COM ESTILO DE INPUT TAILWIND === */
-    .select2-container .select2-selection--single {
-        background-color: #fff;
-        border: 1px solid #d1d5db;
-        /* border-gray-300 */
-        border-radius: 0.375rem;
-        /* rounded-md */
-        padding: 0.5rem 0.75rem;
-        /* px-3 py-2 */
-        font-size: 0.875rem;
-        /* text-sm */
-        color: #111827;
-        /* text-gray-900 */
-        height: auto;
-        min-height: 2.5rem;
-        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
-        /* shadow-sm */
-        transition: border 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
-    }
-
-    /* === COMPORTAMENTO DE FOCO (como input padrão do Tailwind) === */
-    .select2-container--default .select2-selection--single:focus,
-    .select2-container--default .select2-selection--single:focus-visible,
-    .select2-container--default .select2-selection--single:focus-within {
-        border-color: #3b82f6 !important;
-        /* border-blue-500 */
-        outline: none !important;
-        box-shadow: 0 0 0 3px rgba(59, 131, 246, 0.4);
-        /* ring-blue-500 */
-    }
-
-    /* === TEXTO DENTRO DO SELECT === */
-    .select2-selection__rendered {
-        line-height: 1.5rem;
-        color: #111827;
-        /* text-gray-900 */
-    }
-
-    /* === ÍCONE SETA === */
-    .select2-container--default .select2-selection--single .select2-selection__arrow {
-        height: 100%;
-        right: 0.75rem;
-    }
-
-    /* === DROPDOWN ESTILO TAILWIND === */
-    .select2-container .select2-dropdown {
-        border: 1px solid #d1d5db;
-        border-radius: 0.375rem;
-        background-color: #fff;
-        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
-        font-size: 0.875rem;
-    }
-
-    /* === OPÇÕES DA LISTA === */
-    .select2-container .select2-results__option {
-        padding: 0.5rem 0.75rem;
-        color: #374151;
-        /* text-gray-700 */
-        cursor: pointer;
-    }
-
-    /* Hover no item */
-    .select2-container .select2-results__option--highlighted {
-        background-color: rgba(88, 96, 255, 0.55) !important;
-        /* bg-gray-200 */
-        color: #111827 !important;
-        /* text-gray-900 */
-    }
-
-    /* Item selecionado */
-    .select2-container--default .select2-results__option--selected {
-        background-color: rgba(88, 96, 255, 0.30) !important;
-        /* bg-gray-100 */
-        color: #111827 !important;
-        /* text-gray-900 */
-    }
-</style>
 
 
 <body class="bg-gray-100 font-sans">
@@ -124,7 +46,6 @@ $id_usuario = Security::getUser()['id_usuario']; ?>
                                 <label for="empresa" class="block text-sm font-medium text-gray-700 mb-2">Empresa <span class="text-red-500">*</span>
                                 </label>
                                 <select id="empresa" name="id_empresa" class="select2 w-full border border-gray-300 rounded-md p-2" required>
-                                    <option value="">Selecione a empresa</option>
                                     <?php foreach ($lista_empresas as $empresa) : ?>
                                         <option value="<?= $empresa['id_empresa'] ?>"><?= $empresa['ds_empresa'] ?></option>
                                     <?php endforeach; ?>
@@ -336,51 +257,7 @@ $id_usuario = Security::getUser()['id_usuario']; ?>
         $('#form_novo_chamado').on('submit', function(e) {
             e.preventDefault();
 
-            // Remove erros anteriores
-            $('#form_novo_chamado [required]').removeClass('border-red-500');
-            $('#form_novo_chamado .error-message').remove();
-
-            let isValid = true;
-
-            let validatedRadios = [];
-
-            $('#form_novo_chamado [required]').each(function() {
-                const name = $(this).attr('name');
-                const type = $(this).attr('type');
-
-                // Se for radio, só valida uma vez por grupo
-                if (type === 'radio') {
-                    if (validatedRadios.includes(name)) return;
-                    validatedRadios.push(name);
-
-                    if ($(`input[name="${name}"]:checked`).length === 0) {
-                        isValid = false;
-                        const group = $(`input[name="${name}"]`).last().parent().parent(); // div com os radios
-                        group.after('<p class="text-red-500 text-sm mt-1 error-message">Este campo é obrigatório.</p>');
-                    }
-                } else {
-                    const value = $(this).val()?.trim();
-                    if (!value) {
-                        isValid = false;
-                        $(this).addClass('border-red-500');
-                        const isSelect2 = $(this).hasClass('select2');
-                        const errorMsg = '<p class="text-red-500 text-sm mt-1 error-message">Este campo é obrigatório.</p>';
-
-                        if (isSelect2) {
-                            $(this).next('.select2').after(errorMsg);
-                        } else {
-                            $(this).after(errorMsg);
-                        }
-                    }
-                }
-            });
-
-
-
-            // Interrompe envio se estiver inválido
-            if (!isValid) {
-                return;
-            }
+            if (!validarFormulario(this)) return;
 
             var form = $('#form_novo_chamado')[0];
             var formData = new FormData(form);
@@ -415,6 +292,56 @@ $id_usuario = Security::getUser()['id_usuario']; ?>
 
 
         $(document).ready(function() {
+            var idEmpresa = $('#empresa').val();
+            var id_usuario = $('#id_usuario').val();
+            var idMotivo = $('#motivo_principal').val();
+            $('#localizacao').html('<option value="">Carregando...</option>');
+
+            if (idMotivo && idMotivo === '6') {
+                $.ajax({
+                    url: '../appNovoChamado/carrega_motivo_associado_empresa.php',
+                    data: {
+                        id_motivo_principal: idMotivo,
+                        id_empresa: idEmpresa
+                    },
+                    type: 'GET',
+                    dataType: 'json',
+                    success: function(data) {
+                        let options = '<option value="">Selecione o detalhe</option>';
+                        data.forEach(function(item) {
+                            options += `<option value="${item.id_motivo_principal}">${item.ds_descricao_motivo}</option>`;
+                        });
+                        $('#motivo_associado').html(options).trigger('change.select2');
+                    },
+                    error: function() {
+                        alert('Erro ao carregar os detalhes 2.');
+                    }
+                });
+            }
+
+            if (idEmpresa) {
+                $.ajax({
+                    url: '../appNovoChamado/carrega_localizacao_por_usuario.php',
+                    data: {
+                        id_empresa: idEmpresa,
+                        id_usuario: id_usuario
+                    },
+                    type: 'GET',
+                    dataType: 'json',
+                    success: function(data) {
+                        // let options = '<option value="">Selecione a localização</option>';
+                        data.forEach(function(item) {
+                            options = `<option value="${item.id_localizacao}">${item.ds_localizacao}</option>`;
+                        });
+                        $('#localizacao').html(options).trigger('change.select2');
+                    },
+                    error: function() {
+                        alert('Erro ao carregar as localizações.');
+                    }
+                });
+            } else {
+                $('#localizacao').html('<option value="">Selecione a localização</option>').trigger('change.select2');
+            }
 
             // Quando escolher o tipo de chamado, carrega os motivos principais
             $('#tipo_chamado').on('change', function() {
@@ -455,6 +382,7 @@ $id_usuario = Security::getUser()['id_usuario']; ?>
             // Quando escolher o motivo principal, carrega os associados
             $('#motivo_principal').on('change', function() {
                 const idMotivo = $(this).val();
+                const id_empresa = $('#empresa').val();
 
                 if (idMotivo === '6') {
                     $('#div_st_grau').show();
@@ -465,7 +393,27 @@ $id_usuario = Security::getUser()['id_usuario']; ?>
                 }
                 $('#motivo_associado').html('<option value="">Carregando...</option>');
 
-                if (idMotivo) {
+                if (idMotivo && idMotivo === '6') {
+                    $.ajax({
+                        url: '../appNovoChamado/carrega_motivo_associado_empresa.php',
+                        data: {
+                            id_motivo_principal: idMotivo,
+                            id_empresa: id_empresa
+                        },
+                        type: 'GET',
+                        dataType: 'json',
+                        success: function(data) {
+                            let options = '<option value="">Selecione o detalhe</option>';
+                            data.forEach(function(item) {
+                                options += `<option value="${item.id_motivo_principal}">${item.ds_descricao_motivo}</option>`;
+                            });
+                            $('#motivo_associado').html(options).trigger('change.select2');
+                        },
+                        error: function() {
+                            alert('Erro ao carregar os detalhes 2.');
+                        }
+                    });
+                } else if (idMotivo) {
                     $.ajax({
                         url: '../appNovoChamado/carrega_motivo_associado.php',
                         data: {
@@ -489,20 +437,45 @@ $id_usuario = Security::getUser()['id_usuario']; ?>
 
             $('#empresa').on('change', function() {
                 const idEmpresa = $(this).val();
+                const idMotivo = $('#motivo_principal').val();
+                const id_usuario = $('#id_usuario').val();
                 $('#localizacao').html('<option value="">Carregando...</option>');
 
-                if (idEmpresa) {
+                if (idMotivo && idMotivo === '6') {
                     $.ajax({
-                        url: '../appNovoChamado/carrega_localizacao.php',
+                        url: '../appNovoChamado/carrega_motivo_associado_empresa.php',
                         data: {
+                            id_motivo_principal: idMotivo,
                             id_empresa: idEmpresa
                         },
                         type: 'GET',
                         dataType: 'json',
                         success: function(data) {
-                            let options = '<option value="">Selecione a localização</option>';
+                            let options = '<option value="">Selecione o detalhe</option>';
                             data.forEach(function(item) {
-                                options += `<option value="${item.id_localizacao}">${item.ds_localizacao}</option>`;
+                                options += `<option value="${item.id_motivo_principal}">${item.ds_descricao_motivo}</option>`;
+                            });
+                            $('#motivo_associado').html(options).trigger('change.select2');
+                        },
+                        error: function() {
+                            alert('Erro ao carregar os detalhes 2.');
+                        }
+                    });
+                }
+
+                if (idEmpresa) {
+                    $.ajax({
+                        url: '../appNovoChamado/carrega_localizacao_por_usuario.php',
+                        data: {
+                            id_empresa: idEmpresa,
+                            id_usuario: id_usuario
+                        },
+                        type: 'GET',
+                        dataType: 'json',
+                        success: function(data) {
+                            // let options = '<option value="">Selecione a localização</option>';
+                            data.forEach(function(item) {
+                                options = `<option value="${item.id_localizacao}">${item.ds_localizacao}</option>`;
                             });
                             $('#localizacao').html(options).trigger('change.select2');
                         },
