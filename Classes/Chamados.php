@@ -274,14 +274,19 @@ class Chamados
         $con = Conecta::getConexao();
         if ($id_perfil == 1) {
             $where = "rl.id_usuario = " . $id_usuario . " ";
-        } else {
+        } else if( $id_perfil == 3) {
+            $where = "r2.id_usuario = " . $id_usuario . " ";
+        }
+
+        else {
             $where = "c.id_usuario = " . $id_usuario;
         }
 
-        $select = "SELECT c.*,u1.ds_nome,u2.ds_nome,rl.dt_aceito FROM tb_chamados c
+        $select = "SELECT Distinct c.*,u1.ds_nome,u2.ds_nome,rl.dt_aceito FROM tb_chamados c
         left join tb_usuario u1 on u1.id_usuario = c.id_usuario
         left join rl_chamado_usuario rl on rl.id_chamado = c.id_chamado
         left join tb_usuario u2 on u2.id_usuario = rl.id_usuario
+        INNER JOIN rl_usuario_empresa_localizacao r2 ON r2.id_localizacao = c.id_localizacao
         where $where
         order by c.id_chamado desc";
 

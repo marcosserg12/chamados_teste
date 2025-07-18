@@ -28,19 +28,21 @@
                     <span>Novo Chamado</span>
                 </a>
             </li>
-            <?php if(Security::getUser()['id_perfil'] == 1) : ?>
-            <li class="mb-2 " id="adminUsersLink">
-                <a href="../Telas/Gerenciar_usuario.php" class="flex items-center p-2 text-gray-700 rounded-lg hover:bg-blue-50">
-                    <i class="fas fa-users-cog mr-3"></i>
-                    <span>Gerenciar Usuários</span>
-                </a>
-            </li>
-            <li class="mb-2 " id="adminTicketsLink">
-                <a href="../Telas/Todos_chamados.php" class="flex items-center p-2 text-gray-700 rounded-lg hover:bg-blue-50">
-                    <i class="fas fa-clipboard-list mr-3"></i>
-                    <span>Todos os Chamados</span>
-                </a>
-            </li>
+            <?php if (Security::getUser()['id_perfil'] == 1) : ?>
+                <li class="mb-2 " id="adminUsersLink">
+                    <a href="../Telas/Gerenciar_usuario.php" class="flex items-center p-2 text-gray-700 rounded-lg hover:bg-blue-50">
+                        <i class="fas fa-users-cog mr-3"></i>
+                        <span>Gerenciar Usuários</span>
+                    </a>
+                </li>
+            <?php endif; ?>
+            <?php if (in_array(Security::getUser()['id_perfil'], [1, 4])) : ?>
+                <li class="mb-2 " id="adminTicketsLink">
+                    <a href="../Telas/Todos_chamados.php" class="flex items-center p-2 text-gray-700 rounded-lg hover:bg-blue-50">
+                        <i class="fas fa-clipboard-list mr-3"></i>
+                        <span>Todos os Chamados</span>
+                    </a>
+                </li>
             <?php endif; ?>
         </ul>
     </nav>
