@@ -127,7 +127,7 @@ $dados = $usuario->lista();
                     render: function(data, type, full, meta) {
                         if (full[4] == 'A') {
                             return `
-        <a href="../Telas/Editar_usuario?id_usuario=${full[0]}" class="btn btn-sm btn-outline-primary me-1 btn-editar2" title="Alterar Cadastro" data-usuario="${full[0]}" >
+        <a href="../Telas/Editar_usuario.php?id_usuario=${full[0]}" class="btn btn-sm btn-outline-primary me-1 btn-editar2" title="Alterar Cadastro" data-usuario="${full[0]}" >
             <i class="bi bi-pencil-square"></i>
         </a>
         <a href="#" class="btn btn-sm btn-outline-danger btn-excluir" title="Inativar" data-usuario="${full[0]}" data-status="I">
@@ -135,7 +135,7 @@ $dados = $usuario->lista();
         </a>`;
                         } else if (full[4] == 'I') {
                             return `
-        <a href="../Telas/Editar_usuario?id_usuario=${$full[0]}" class="btn btn-sm btn-outline-primary me-1 btn-editar2" title="Alterar Cadastro" data-usuario="${full[0]}">
+        <a href="../Telas/Editar_usuario.php?id_usuario=${$full[0]}" class="btn btn-sm btn-outline-primary me-1 btn-editar2" title="Alterar Cadastro" data-usuario="${full[0]}">
             <i class="bi bi-pencil-square"></i>
         </a>
         <a href="#" class="btn btn-sm btn-outline-success btn-excluir" title="Ativar" data-usuario="${full[0]}" data-status="A">
@@ -143,7 +143,7 @@ $dados = $usuario->lista();
         </a>`;
                         } else {
                             return `
-        <a href="../Telas/Editar_usuario?id_usuario=${$full[0]}" class="btn btn-sm btn-outline-primary me-1 btn-editar2" title="Alterar Cadastro" data-usuario="${full[0]}" >
+        <a href="../Telas/Editar_usuario.php?id_usuario=${$full[0]}" class="btn btn-sm btn-outline-primary me-1 btn-editar2" title="Alterar Cadastro" data-usuario="${full[0]}" >
             <i class="bi bi-pencil-square"></i>
         </a>
         <a href="#" class="btn btn-sm btn-outline-danger btn-excluir" title="Inativar" data-usuario="${full[0]}" data-status="I">
