@@ -249,26 +249,17 @@ class Usuario
         $ds_email       = $dados['ds_email'];
         $id_perfil      = $dados['id_perfil'];
         $nu_telefone    = preg_replace('/\D/', '', $dados['nu_telefone']);
-        // $nu_cep         = preg_replace('/\D/', '', $dados['nu_cep']);
-        // $ds_endereco    = $dados['ds_endereco'];
-        $ds_senha       = $dados['ds_senha'];
 
         $con = Conecta::getConexao();
 
+        // Monta dinamicamente os campos do update
         $update = "UPDATE tb_usuario SET
-                    ds_nome = :ds_nome,
-                    ds_usuario = :ds_usuario,
-                    ds_email = :ds_email,
-                    id_perfil = :id_perfil,
-                    nu_telefone = :nu_telefone,
-                    -- nu_cep = :nu_cep,
-                    -- ds_endereco = :ds_endereco,
-                    st_reset_senha = 1,
-                    ds_senha = :ds_senha,
-                    dt_update = NOW()
-                WHERE id_usuario = :id_usuario";
-
-        $stmt = $con->prepare($update);
+                ds_nome = :ds_nome,
+                ds_usuario = :ds_usuario,
+                ds_email = :ds_email,
+                id_perfil = :id_perfil,
+                nu_telefone = :nu_telefone,
+                dt_update = NOW()";
 
         $params = [
             ':ds_nome' => $ds_nome,
@@ -276,18 +267,26 @@ class Usuario
             ':ds_email' => $ds_email,
             ':id_perfil' => $id_perfil,
             ':nu_telefone' => $nu_telefone,
-            // ':nu_cep' => $nu_cep,
-            // ':ds_endereco' => $ds_endereco,
-            ':ds_senha' => hash('SHA512', $ds_senha),
-            ':id_usuario' => $id_usuario
         ];
 
+        // Só atualiza a senha se ela foi preenchida
+        if (!empty($dados['ds_senha'])) {
+            $update .= ", ds_senha = :ds_senha, st_reset_senha = 1";
+            $params[':ds_senha'] = hash('SHA512', $dados['ds_senha']);
+        }
+
+        $update .= " WHERE id_usuario = :id_usuario";
+        $params[':id_usuario'] = $id_usuario;
+
+        $stmt = $con->prepare($update);
         $stmt->execute($params);
 
+        // Grava vinculações, se houver
         if (!empty($dados['vinculos'])) {
             $this->gravarVinculosEmpresaLocalizacao($id_usuario, $dados['vinculos']);
         }
     }
+
 
     public function alterarDadosUsuario($id_usuario, array $dados)
     {
