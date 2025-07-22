@@ -66,7 +66,7 @@ $totalchamados = $chamados->totalChamados(Security::getUser()['id_perfil'], Secu
                 <div class="bg-white shadow rounded-lg p-6 mb-6">
                     <div class="flex justify-between items-center mb-4">
                         <h2 class="text-lg font-semibold text-gray-800">Últimos Chamados</h2>
-                        <?php if (Security::getUser()['id_perfil'] == 1) : ?>
+                        <?php if (in_array(Security::getUser()['id_perfil'], [1, 4])) : ?>
                             <a href="../Telas/Todos_chamados.php" class="text-sm text-blue-600 hover:underline" id="viewAllTickets">Ver todos</a>
                         <?php endif ?>
                     </div>
