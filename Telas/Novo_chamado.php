@@ -507,7 +507,7 @@ $lista_empresas = $chamado->lista_empresas_usuario($id_usuario);
                 }
 
                 // Exemplo de chamada para um endpoint backend que você controlaria
-                const response = await fetch('.../api/melhorar_texto.php', {
+                const response = await fetch('../api/melhorar_texto.php', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
