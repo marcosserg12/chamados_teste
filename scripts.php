@@ -2,7 +2,7 @@
 <?php
 session_start();
 
-if (!isset($_SESSION['usuario'])) {
+if (!isset($_SESSION['user'])) {
     // Redireciona com query string informando o motivo
     header('Location: ../index.php?session=expired');
     exit;
