@@ -8,6 +8,8 @@ try{
     $usuario = new Usuario();
 
     $usuario->alterarSenha($id_usuario, $ds_Senha);
+    session_start();
+    $_SESSION['user']['st_reset_senha'] = 0;
 
     echo json_response([
         'message' => 'Senha alterada com sucesso!',

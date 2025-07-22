@@ -45,11 +45,9 @@ class Security {
             throw new Exception('Não possível localizar nenhum cadastro com os dados informados.');
         }
 
-        if($credentials["ds_senha"] != 'admin@123'){
             if (hash("SHA512", $credentials['ds_senha']) !== $dados['ds_senha']) {
                 throw new Exception('A senha digitada está incorreta.');
             }
-        }
 
         return $dados;
     }

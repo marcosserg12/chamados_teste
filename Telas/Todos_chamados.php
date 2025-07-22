@@ -8,7 +8,7 @@ session_start();
 if (!Security::isAuthenticated()) {
     redirect('../index.php');
 }
-if (Security::getUser()['id_perfil'] != 1) {
+if (in_array(Security::getUser()['id_perfil'], [1, 4])) {
     redirect('../index.php');
 }
 

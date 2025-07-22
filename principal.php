@@ -124,6 +124,34 @@ $totalchamados = $chamados->totalChamados(Security::getUser()['id_perfil'], Secu
             </div>
         </main>
     </div>
+
+    <!-- Modal de Redefinição de Senha -->
+    <div x-data="{ open: <?= Security::getUser()['st_reset_senha'] == 1 ? 'true' : 'false' ?> }"
+        x-show="open"
+        class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50"
+        x-transition>
+        <div class="bg-white p-6 rounded-lg shadow max-w-md w-full">
+            <h2 class="text-lg font-semibold text-gray-800 mb-4">Redefinir Senha</h2>
+            <form id="formResetSenha">
+                <input type="hidden" name="id_usuario" value="<?= Security::getUser()['id_usuario'] ?>">
+                <div class="mb-4">
+                    <label for="novaSenha" class="block text-sm font-medium text-gray-700">Nova Senha</label>
+                    <input type="password" id="novaSenha" name="novaSenha" required
+                        class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm px-3 py-2">
+                </div>
+                <div class="mb-4">
+                    <label for="confirmarSenha" class="block text-sm font-medium text-gray-700">Confirmar Senha</label>
+                    <input type="password" id="confirmarSenha" name="confirmarSenha" required
+                        class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm px-3 py-2">
+                </div>
+                <div class="flex justify-end">
+                    <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Salvar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+
     <script>
         document.addEventListener("DOMContentLoaded", function() {
             const tabela = document.getElementById('tabelaSimples');
@@ -139,5 +167,49 @@ $totalchamados = $chamados->totalChamados(Security::getUser()['id_perfil'], Secu
                 tabela.classList.add('hidden');
                 noDataMessage.classList.remove('hidden');
             }
+        });
+    </script>
+
+    <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+    <script>
+        $('#formResetSenha').on('submit', function(e) {
+            e.preventDefault();
+
+            const senha = $('#novaSenha').val();
+            const confirmar = $('#confirmarSenha').val();
+
+            if (senha !== confirmar) {
+                Swal.fire({
+                    title: 'Erro!',
+                    text: 'As senhas não coincidem.',
+                    icon: 'error'
+                });
+                return;
+            }
+
+            $.ajax({
+                url: 'appUsuario/alterar_senha.php',
+                method: 'POST',
+                data: {
+                    id_usuario: $('input[name="id_usuario"]').val(),
+                    senha: senha
+                },
+                dataType: 'json',
+                success: function(response) {
+                    Swal.fire({
+                        title: response.message || 'Senha alterada com sucesso!',
+                        icon: 'success'
+                    }).then(() => {
+                        location.reload();
+                    });
+                },
+                error: function() {
+                    Swal.fire({
+                        title: 'Erro!',
+                        text: 'Erro ao tentar alterar a senha.',
+                        icon: 'error'
+                    });
+                }
+            });
         });
     </script>

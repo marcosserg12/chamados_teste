@@ -1,5 +1,14 @@
 <html lang="pt-BR">
+<?php
+session_start();
 
+if (!isset($_SESSION['usuario'])) {
+    // Redireciona com query string informando o motivo
+    header('Location: ../index.php?session=expired');
+    exit;
+}
+
+?>
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -21,6 +30,8 @@
     <script src="../assets/js/custom/scripts/lightgallery.min.js"></script>
     <script src="../assets/js/custom/scripts/lg-zoom.min.js"></script>
     <script src="../assets/js/custom/scripts/lg-thumbnail.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+
 
     <!-- PDF.js -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.min.js"></script>

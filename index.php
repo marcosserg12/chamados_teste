@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <?php
-require_once __DIR__ . '/core.php';
+// require_once __DIR__ . '/core.php';
 
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
@@ -103,3 +103,14 @@ $uri = $_SERVER['HTTP_HOST'];
 <script src="../assets/js/custom/scripts/sweetalert2.js"></script>
 
 <script src="./assets/js/appLogin/login.js" type="text/javascript"></script>
+
+<?php if (isset($_GET['session']) && $_GET['session'] === 'expired'): ?>
+<script>
+    Swal.fire({
+        icon: 'info',
+        title: 'Sessão expirada',
+        text: 'Sua sessão foi finalizada por inatividade. Por favor, faça login novamente.',
+        confirmButtonText: 'Ok'
+    });
+</script>
+<?php endif; ?>
