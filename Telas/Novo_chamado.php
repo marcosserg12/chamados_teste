@@ -328,9 +328,9 @@ $id_usuario = Security::getUser()['id_usuario']; ?>
                     type: 'GET',
                     dataType: 'json',
                     success: function(data) {
-                        // let options = '<option value="">Selecione a localização</option>';
+                        let options = '<option value="">Selecione a localização</option>';
                         data.forEach(function(item) {
-                            options = `<option value="${item.id_localizacao}">${item.ds_localizacao}</option>`;
+                            options += `<option value="${item.id_localizacao}">${item.ds_localizacao}</option>`;
                         });
                         $('#localizacao').html(options).trigger('change.select2');
                     },
@@ -472,9 +472,9 @@ $id_usuario = Security::getUser()['id_usuario']; ?>
                         type: 'GET',
                         dataType: 'json',
                         success: function(data) {
-                            // let options = '<option value="">Selecione a localização</option>';
+                            let options = '<option value="">Selecione a localização</option>';
                             data.forEach(function(item) {
-                                options = `<option value="${item.id_localizacao}">${item.ds_localizacao}</option>`;
+                                options += `<option value="${item.id_localizacao}">${item.ds_localizacao}</option>`;
                             });
                             $('#localizacao').html(options).trigger('change.select2');
                         },
