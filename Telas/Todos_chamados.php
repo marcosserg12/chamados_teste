@@ -1,4 +1,5 @@
 <?php
+include   '../scripts.php';
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
@@ -7,7 +8,7 @@ require '../vendor/autoload.php';
 if (!Security::isAuthenticated()) {
     redirect('../index.php');
 }
-if (in_array(Security::getUser()['id_perfil'], [1, 4])) {
+if (!in_array(Security::getUser()['id_perfil'], [1, 4])) {
     redirect('../index.php');
 }
 
@@ -15,7 +16,6 @@ $chamados = new Chamados();
 $geral = new Geral();
 $dados = $chamados->todosChamados();
 ?>
-<?php include  '../scripts.php'; ?>
 
 <body class="bg-gray-100 font-sans">
 

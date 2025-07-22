@@ -1,4 +1,5 @@
 <?php
+include   '../scripts.php';
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
@@ -13,7 +14,7 @@ $geral = new Geral();
 $dados = $chamados->meusChamados(Security::getUser()['id_perfil'], Security::getUser()['id_usuario']);
 ?>
 
-<?php include   '../scripts.php'; ?>
+
 
 
 <body class="bg-gray-100 font-sans">
