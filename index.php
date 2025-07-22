@@ -148,7 +148,7 @@ $uri = $_SERVER['HTTP_HOST'];
                         </div>
                         <div class="relative flex justify-center text-sm">
                             <span class="px-2 bg-white text-gray-500">
-                                Suporte: suporte@ibranutro.com.br
+                                suporte@ibranutro.com.br
                             </span>
                         </div>
                     </div>
