@@ -133,9 +133,9 @@ $lista_empresas = $chamado->lista_empresas_usuario($id_usuario);
                             </label>
                             <textarea id="ticketDescription" rows="5" class="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md p-2 border" placeholder="Descreva o problema em detalhes..." required name="ds_descricao"></textarea>
 
-                            <button type="button" id="improveTextBtn" class="mt-2 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
+                            <!-- <button type="button" id="improveTextBtn" class="mt-2 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
                                 Melhorar texto com IA
-                            </button>
+                            </button> -->
                         </div>
 
                         <div class="mb-6">
