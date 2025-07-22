@@ -14,7 +14,7 @@ $lista_tipo_chamado = $chamado->lista_tipos_chamados();
 $lista_empresas = $chamado->lista_empresas_usuario($id_usuario);
 
 
-$id_usuario = Security::getUser()['id_usuario']; ?>
+?>
 
 
 <body class="bg-gray-100 font-sans">

@@ -6,7 +6,8 @@ try {
     $chamados = new Chamados();
 
     $id_chamado = $chamados->gravarComentario($_POST['id_chamado'], $_POST['ds_comentario'], $_POST['id_usuario']);
-    $nu_telefone = $chamados->verificarNumeroTelChamado($_POST['id_chamado']);
+    $nu_telefone_responsavel = $chamados->verificarNumeroTelChamado($_POST['id_chamado']);
+    $nu_telefone_dono = $chamados->telefoneDono($_POST['id_chamado']);
     // Configurações da Evolution API
     $evolutionSender = new EvolutionWhatsAppSender(
         'http://145.223.26.225:8081/',
@@ -14,14 +15,20 @@ try {
         'teste'
     );
 
-    $messageText = "Novo comentário no chamado #{$_POST['id_chamado']}: {$_POST['ds_comentario']}";
-    $toNumber = '55' . $nu_telefone; // Ajuste para o número desejado
+    $messageText = "Novo comentário no chamado #{$id_chamado}: \n".
+                    "{$_POST['ds_comentario']}\n".
+                    "* Confira em: * \n" .
+                    "https://chamados.sisibranutro.com.br/Telas/Detalhe_chamado.php?id_chamado={$id_chamado}";
 
-    $result = $evolutionSender->sendMessage($toNumber, $messageText);
+    $responsavel = '55' . $nu_telefone_responsavel; // Ajuste para o número desejado
+    $dono = '55' . $nu_telefone_dono; // Ajuste para o número desejado
 
-    if ($result === false) {
-        throw new Exception('Falha ao enviar mensagem via Evolution API');
-    }
+    $evolutionSender->sendMessage($responsavel, $messageText);
+    $evolutionSender->sendMessage($dono, $messageText);
+
+    // if ($result === false) {
+    //     throw new Exception('Falha ao enviar mensagem via Evolution API');
+    // }
 
 
 

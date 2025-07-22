@@ -274,11 +274,9 @@ class Chamados
         $con = Conecta::getConexao();
         if ($id_perfil == 1) {
             $where = "rl.id_usuario = " . $id_usuario . " ";
-        } else if( $id_perfil == 3) {
+        } else if ($id_perfil == 3) {
             $where = "r2.id_usuario = " . $id_usuario . " ";
-        }
-
-        else {
+        } else {
             $where = "c.id_usuario = " . $id_usuario;
         }
 
@@ -625,7 +623,7 @@ class Chamados
 
         return $dados;
     }
-    function lista_motivo_associado_empresa($id_motivo_principal,$id_empresa)
+    function lista_motivo_associado_empresa($id_motivo_principal, $id_empresa)
     {
         $con = Conecta::getConexao();
 
@@ -635,7 +633,7 @@ class Chamados
         $stmt = $con->prepare($select);
 
 
-        $stmt->execute([':id_motivo_principal' => $id_motivo_principal , ':id_empresa' => $id_empresa]);
+        $stmt->execute([':id_motivo_principal' => $id_motivo_principal, ':id_empresa' => $id_empresa]);
         $dados = $stmt->fetchAll();
 
         return $dados;
@@ -688,7 +686,7 @@ class Chamados
 
         return $dados;
     }
-    function lista_localizacao_usuario($id_empresa,$id_usuario)
+    function lista_localizacao_usuario($id_empresa, $id_usuario)
     {
         $con = Conecta::getConexao();
 
@@ -700,7 +698,7 @@ class Chamados
         $stmt = $con->prepare($select);
 
 
-        $stmt->execute([':id_empresa' => $id_empresa,':id_usuario' => $id_usuario]);
+        $stmt->execute([':id_empresa' => $id_empresa, ':id_usuario' => $id_usuario]);
         $dados = $stmt->fetchAll();
 
         return $dados;
@@ -779,5 +777,97 @@ class Chamados
             ':id_usuario' => $dados['id_usuario'],
             ':dt_update' => date('Y-m-d H:i:s'),
         ]);
+    }
+
+    function numerosTecnicos()
+    {
+        $connection = Conecta::getConexao();
+
+        $sql = "
+        SELECT u.id_usuario,u.nu_telefone
+        FROM tb_usuario u
+        WHERE id_perfil = 4 or id_usuario = 23";
+
+        $stmt = $connection->prepare($sql);
+        $stmt->execute();
+
+        $resultado = $stmt->fetchAll();
+
+        return $resultado ;
+    }
+        function buscarNumeroPeloUsr($id_usuario): ?string
+    {
+        $connection = Conecta::getConexao();
+
+        $sql = "
+        SELECT u.id_usuario,u.nu_telefone
+        FROM tb_usuario u
+        WHERE u.id_usuario = :id_usuario
+        limit 1";
+
+        $stmt = $connection->prepare($sql);
+        $stmt->execute([':id_usuario' => $id_usuario]);
+
+        $resultado = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        return $resultado ? $resultado['nu_telefone'] : null;
+    }
+
+
+    function numerosGestores($id_empresa,$id_localizacao)
+    {
+        $connection = Conecta::getConexao();
+
+        $sql = "SELECT u.* from tb_usuario u
+        left join rl_usuario_empresa_localizacao rl on rl.id_usuario = u.id_usuario
+        where id_perfil = 3 and rl.id_localizacao = :id_localizacao and rl.id_empresa = :id_empresa";
+
+        $stmt = $connection->prepare($sql);
+        $stmt->execute([
+            ':id_localizacao' => $id_localizacao,
+            ':id_empresa' => $id_empresa
+        ]);
+
+        $resultado = $stmt->fetchAll();
+
+        return $resultado ;
+    }
+
+    function infoLocEmpresa($id_empresa,$id_localizacao)
+    {
+        $connection = Conecta::getConexao();
+
+        $sql = "SELECT ds_localizacao,ds_empresa from tb_localizacao l
+        inner join rl_empresa_localizacao rl on rl.id_localizacao = l.id_localizacao
+        inner join tb_empresa e on e.id_empresa = rl.id_empresa
+        where rl.id_empresa = :id_empresa and rl.id_localizacao = :id_localizacao;";
+
+        $stmt = $connection->prepare($sql);
+        $stmt->execute([
+            ':id_localizacao' => $id_localizacao,
+            ':id_empresa' => $id_empresa
+        ]);
+
+        $resultado = $stmt->fetch();
+
+        return $resultado ;
+    }
+        function telefoneDono($id_chamado): ?string
+    {
+        $connection = Conecta::getConexao();
+
+        $sql = "
+        SELECT u.nu_telefone
+        FROM tb_usuario u
+        inner join tb_chamado c on c.id_usuario = u.id_usuario
+        WHERE c.id_chamado = :id_chamado
+        limit 1";
+
+        $stmt = $connection->prepare($sql);
+        $stmt->execute([':id_chamado' => $id_chamado]);
+
+        $resultado = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        return $resultado ? $resultado['nu_telefone'] : null;
     }
 }
