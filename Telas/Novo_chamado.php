@@ -128,10 +128,16 @@ $lista_empresas = $chamado->lista_empresas_usuario($id_usuario);
 
 
                         <div class="mb-6">
-                            <label for="ticketDescription" class="block text-sm font-medium text-gray-700 mb-2">Descrição <span class="text-red-500">*</span>
+                            <label for="ticketDescription" class="block text-sm font-medium text-gray-700 mb-2">
+                                Descrição <span class="text-red-500">*</span>
                             </label>
                             <textarea id="ticketDescription" rows="5" class="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md p-2 border" placeholder="Descreva o problema em detalhes..." required name="ds_descricao"></textarea>
+
+                            <button type="button" id="improveTextBtn" class="mt-2 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
+                                Melhorar texto com IA
+                            </button>
                         </div>
+
                         <div class="mb-6">
                             <label class="block text-sm font-medium text-gray-700 mb-2">Anexos</label>
                             <div class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md">
@@ -488,4 +494,36 @@ $lista_empresas = $chamado->lista_empresas_usuario($id_usuario);
             });
 
         });
+    </script>
+
+    <script>
+            document.getElementById("improveTextBtn").addEventListener("click", async function() {
+                const textarea = document.getElementById("ticketDescription");
+                const originalText = textarea.value;
+
+                if (!originalText.trim()) {
+                    alert("Por favor, escreva uma descrição antes de melhorar.");
+                    return;
+                }
+
+                // Exemplo de chamada para um endpoint backend que você controlaria
+                const response = await fetch('.../api/melhorar_texto.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        texto: originalText
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data?.texto_melhorado) {
+                    textarea.value = data.texto_melhorado;
+                } else {
+                    alert("Ocorreu um erro ao tentar melhorar o texto.");
+                }
+            });
+
     </script>
