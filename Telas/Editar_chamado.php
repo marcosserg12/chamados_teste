@@ -1,7 +1,6 @@
 <?php
 include '../scripts.php';
 require '../vendor/autoload.php';
-session_start();
 
 if (!Security::isAuthenticated()) {
     redirect('../index.php');
