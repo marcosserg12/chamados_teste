@@ -317,6 +317,7 @@ $dados_arquivos = $chamados->mostrararquivosChamado($id_chamado);
         arquivosNovos.forEach(file => {
             formData.append('arquivo[]', file);
         });
+        $('#loader').show();
 
         $.ajax({
             url: '../appNovoChamado/editar_chamado.php',
@@ -325,6 +326,7 @@ $dados_arquivos = $chamados->mostrararquivosChamado($id_chamado);
             contentType: false,
             processData: false,
             success: function(response) {
+                $('#loader').hide();
                 Swal.fire({
                     title: response.message ?? 'Chamado atualizado com sucesso!',
                     icon: 'success'

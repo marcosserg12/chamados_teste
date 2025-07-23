@@ -150,31 +150,31 @@ $dados = $usuario->lista();
         </a>`;
                         }
                     }
-        //                     return `
-        // <a href="#" class="btn btn-sm btn-outline-primary me-1 btn-editar2" title="Alterar Cadastro" data-usuario="${full[0]}" >
-        //     <i class="bi bi-pencil-square"></i>
-        // </a>
-        // <a href="#" class="btn btn-sm btn-outline-danger btn-excluir" title="Inativar" data-usuario="${full[0]}" data-status="I">
-        //     <i class="bi bi-slash-circle"></i>
-        // </a>`;
-        //                 } else if (full[4] == 'I') {
-        //                     return `
-        // <a href="#" class="btn btn-sm btn-outline-primary me-1 btn-editar2" title="Alterar Cadastro" data-usuario="${full[0]}">
-        //     <i class="bi bi-pencil-square"></i>
-        // </a>
-        // <a href="#" class="btn btn-sm btn-outline-success btn-excluir" title="Ativar" data-usuario="${full[0]}" data-status="A">
-        //     <i class="bi bi-check-circle"></i>
-        // </a>`;
-        //                 } else {
-        //                     return `
-        // <a href="#" class="btn btn-sm btn-outline-primary me-1 btn-editar2" title="Alterar Cadastro" data-usuario="${full[0]}" >
-        //     <i class="bi bi-pencil-square"></i>
-        // </a>
-        // <a href="#" class="btn btn-sm btn-outline-danger btn-excluir" title="Inativar" data-usuario="${full[0]}" data-status="I">
-        //     <i class="bi bi-slash-circle"></i>
-        // </a>`;
-        //                 }
-        //             }
+                    //                     return `
+                    // <a href="#" class="btn btn-sm btn-outline-primary me-1 btn-editar2" title="Alterar Cadastro" data-usuario="${full[0]}" >
+                    //     <i class="bi bi-pencil-square"></i>
+                    // </a>
+                    // <a href="#" class="btn btn-sm btn-outline-danger btn-excluir" title="Inativar" data-usuario="${full[0]}" data-status="I">
+                    //     <i class="bi bi-slash-circle"></i>
+                    // </a>`;
+                    //                 } else if (full[4] == 'I') {
+                    //                     return `
+                    // <a href="#" class="btn btn-sm btn-outline-primary me-1 btn-editar2" title="Alterar Cadastro" data-usuario="${full[0]}">
+                    //     <i class="bi bi-pencil-square"></i>
+                    // </a>
+                    // <a href="#" class="btn btn-sm btn-outline-success btn-excluir" title="Ativar" data-usuario="${full[0]}" data-status="A">
+                    //     <i class="bi bi-check-circle"></i>
+                    // </a>`;
+                    //                 } else {
+                    //                     return `
+                    // <a href="#" class="btn btn-sm btn-outline-primary me-1 btn-editar2" title="Alterar Cadastro" data-usuario="${full[0]}" >
+                    //     <i class="bi bi-pencil-square"></i>
+                    // </a>
+                    // <a href="#" class="btn btn-sm btn-outline-danger btn-excluir" title="Inativar" data-usuario="${full[0]}" data-status="I">
+                    //     <i class="bi bi-slash-circle"></i>
+                    // </a>`;
+                    //                 }
+                    //             }
 
                 },
                 {
@@ -211,6 +211,7 @@ $dados = $usuario->lista();
             var id_usuario = $(this).data("usuario");
             var st_ativo = $(this).data("status");
 
+            $('#loader').show();
             $.ajax({
                 url: '../appUsuario/alterar_status.php',
                 type: 'post',
@@ -219,6 +220,7 @@ $dados = $usuario->lista();
                     st_ativo: st_ativo
                 },
                 success: function(data) {
+                    $('#loader').hide();
                     swal.fire({
                         position: 'top-center',
                         icon: 'success',

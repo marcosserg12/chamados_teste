@@ -235,7 +235,7 @@ if ($dados['st_status'] == 0) {
                             </div>
                         </div>
                     </div>
-                    <div class="p-6"  <?php echo $dados['id_motivo_associado'] == '6' && $dados['id_tipo_chamado'] == '2' ? '' : 'style="display: none;"' ?>>
+                    <div class="p-6" <?php echo $dados['id_motivo_associado'] == '6' && $dados['id_tipo_chamado'] == '2' ? '' : 'style="display: none;"' ?>>
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                             <div>
                                 <h4 class="text-sm font-medium text-gray-500 mb-2">Tipo</h4>
@@ -246,7 +246,7 @@ if ($dados['st_status'] == 0) {
                             </div>
                         </div>
                     </div>
-                    <div class="p-6"  <?php echo $dados['id_tipo_chamado'] == '1' && $dados['ds_patrimonio'] != '' ? '' : 'style="display: none;"' ?>>
+                    <div class="p-6" <?php echo $dados['id_tipo_chamado'] == '1' && $dados['ds_patrimonio'] != '' ? '' : 'style="display: none;"' ?>>
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                             <div>
                                 <h4 class="text-sm font-medium text-gray-500 mb-2">Patrimônio</h4>
@@ -511,12 +511,13 @@ if ($dados['st_status'] == 0) {
                     id_usuario_adm: $('#id_usuario').val(),
                     id_usuario_desginado: id
                 };
-
+                $('#loader').show();
                 $.ajax({
                     url: '../appChamado/atribuir_chamado.php',
                     method: 'POST',
                     data: dados,
                     success: function(response) {
+                        $('#loader').hide();
                         dropdown.classList.add('hidden');
                         swal.fire({
                             title: "Designado!",
@@ -556,12 +557,13 @@ if ($dados['st_status'] == 0) {
                     id_usuario_adm: id_usuario,
                     id_usuario_desginado: id_usuario
                 };
-
+                $('#loader').show();
                 $.ajax({
                     url: '../appChamado/atribuir_chamado.php',
                     method: 'POST',
                     data: dados,
                     success: function(response) {
+                        $('#loader').hide();
                         swal.fire({
                             title: "Designado!",
                             text: 'Você assumiu o chamado com sucesso.',
@@ -599,12 +601,13 @@ if ($dados['st_status'] == 0) {
                     id_usuario: id_usuario,
                     st_status: st_status
                 };
-
+                $('#loader').show();
                 $.ajax({
                     url: '../appChamado/mudar_status.php',
                     method: 'POST',
                     data: dados,
                     success: function(response) {
+                        $('#loader').hide();
                         swal.fire({
                             title: "Estado do Chamado Alterado!",
                             text: response.message,
@@ -656,12 +659,14 @@ if ($dados['st_status'] == 0) {
                     id_chamado: $('#id_chamado_comentario').val(),
                     ds_comentario: comentario
                 };
+                $('#loader').show();
 
                 $.ajax({
                     url: '../appChamado/gravar_comentario.php',
                     method: 'POST',
                     data: dados,
                     success: function(response) {
+                        $('#loader').hide();
                         swal.fire({
                             title: "Comentário enviado!",
                             text: response.message,

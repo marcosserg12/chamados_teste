@@ -9,6 +9,7 @@ if (!isset($_SESSION['user'])) {
 }
 
 ?>
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -55,7 +56,41 @@ if (!isset($_SESSION['user'])) {
         });
     </script>
 
+    <style>
+        /* Animação personalizada para o loader */
 
+        @keyframes wave {
+
+            0%,
+            60%,
+            100% {
+                transform: scaleY(0.4);
+            }
+
+            20% {
+                transform: scaleY(1);
+            }
+        }
+        .wave-bar {
+            animation: wave 1.2s ease-in-out infinite;
+        }
+
+        .wave-bar:nth-child(2) {
+            animation-delay: -1.1s;
+        }
+
+        .wave-bar:nth-child(3) {
+            animation-delay: -1.0s;
+        }
+
+        .wave-bar:nth-child(4) {
+            animation-delay: -0.9s;
+        }
+
+        .wave-bar:nth-child(5) {
+            animation-delay: -0.8s;
+        }
+    </style>
 
 
     <style>

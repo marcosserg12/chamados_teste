@@ -179,12 +179,14 @@ if (!Security::isAuthenticated()) {
             if (!validarFormulario(this)) return;
 
             if (!validarEmpresasELocalizacoes()) return;
+            $('#loader').show();
 
             $.ajax({
                 url: '../appUsuario/gravar_usuario.php',
                 type: 'POST',
                 data: $(this).serialize(),
                 success: function(response) {
+                    $('#loader').hide();
                     swal.fire({
                         position: 'top-right',
                         icon: 'success',

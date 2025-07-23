@@ -185,6 +185,7 @@ $totalchamados = $chamados->totalChamados(Security::getUser()['id_perfil'], Secu
                 });
                 return;
             }
+            $('#loader').show();
 
             $.ajax({
                 url: 'appUsuario/alterar_senha.php',
@@ -195,6 +196,7 @@ $totalchamados = $chamados->totalChamados(Security::getUser()['id_perfil'], Secu
                 },
                 dataType: 'json',
                 success: function(response) {
+                    $('#loader').hide();
                     Swal.fire({
                         title: response.message || 'Senha alterada com sucesso!',
                         icon: 'success'

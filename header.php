@@ -34,6 +34,20 @@
     </div>
 </div>
 
+<!-- Overlay de fundo que cobre a tela -->
+<div id="loader" class="fixed inset-0 bg-white/80 z-50 flex items-center justify-center" style="display: none;">
+    <div class="bg-white p-6 rounded-xl shadow-md flex flex-col items-center">
+        <div class="flex items-center justify-center h-16 gap-1 mb-4">
+            <div class="w-3 h-10 bg-indigo-500 wave-bar"></div>
+            <div class="w-3 h-10 bg-indigo-500 wave-bar"></div>
+            <div class="w-3 h-10 bg-indigo-500 wave-bar"></div>
+            <div class="w-3 h-10 bg-indigo-500 wave-bar"></div>
+            <div class="w-3 h-10 bg-indigo-500 wave-bar"></div>
+        </div>
+        <p class="text-gray-700 text-lg font-medium">Carregando...</p>
+    </div>
+</div>
+
 <script>
     const pageTitle = document.getElementById('pageTitle');
     const path = window.location.pathname;

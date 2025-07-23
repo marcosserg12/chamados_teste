@@ -275,6 +275,8 @@ $lista_empresas = $chamado->lista_empresas_usuario($id_usuario);
                 formData.append('arquivo[]', file);
             });
 
+            $('#loader').show();
+
             $.ajax({
                 url: '../appNovoChamado/gravar_chamado.php',
                 type: 'POST',
@@ -282,6 +284,8 @@ $lista_empresas = $chamado->lista_empresas_usuario($id_usuario);
                 processData: false,
                 contentType: false,
                 success: function(response) {
+                    $('#loader').hide(); // certo
+
                     swal.fire({
                         title: response.message,
                         icon: "success"
@@ -497,33 +501,33 @@ $lista_empresas = $chamado->lista_empresas_usuario($id_usuario);
     </script>
 
     <script>
-            document.getElementById("improveTextBtn").addEventListener("click", async function() {
-                const textarea = document.getElementById("ticketDescription");
-                const originalText = textarea.value;
+            // document.getElementById("improveTextBtn").addEventListener("click", async function() {
+            //     const textarea = document.getElementById("ticketDescription");
+            //     const originalText = textarea.value;
 
-                if (!originalText.trim()) {
-                    alert("Por favor, escreva uma descrição antes de melhorar.");
-                    return;
-                }
+            //     if (!originalText.trim()) {
+            //         alert("Por favor, escreva uma descrição antes de melhorar.");
+            //         return;
+            //     }
 
-                // Exemplo de chamada para um endpoint backend que você controlaria
-                const response = await fetch('../api/melhorar_texto.php', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        texto: originalText
-                    })
-                });
+            //     // Exemplo de chamada para um endpoint backend que você controlaria
+            //     const response = await fetch('../api/melhorar_texto.php', {
+            //         method: 'POST',
+            //         headers: {
+            //             'Content-Type': 'application/json',
+            //         },
+            //         body: JSON.stringify({
+            //             texto: originalText
+            //         })
+            //     });
 
-                const data = await response.json();
+            //     const data = await response.json();
 
-                if (data?.texto_melhorado) {
-                    textarea.value = data.texto_melhorado;
-                } else {
-                    alert("Ocorreu um erro ao tentar melhorar o texto.");
-                }
-            });
+            //     if (data?.texto_melhorado) {
+            //         textarea.value = data.texto_melhorado;
+            //     } else {
+            //         alert("Ocorreu um erro ao tentar melhorar o texto.");
+            //     }
+            // });
 
     </script>
