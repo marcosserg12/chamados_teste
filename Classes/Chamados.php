@@ -238,10 +238,12 @@ class Chamados
     {
         $con = Conecta::getConexao();
 
-        $select = "SELECT c.*,u1.ds_nome as criador,u2.ds_nome as designado,rl.dt_aceito,rl.id_usuario as id_usuario_designado,hc.dt_update FROM tb_chamados c
+        $select = "SELECT c.*,u1.ds_nome as criador,u2.ds_nome as designado,rl.dt_aceito,rl.id_usuario as id_usuario_designado,hc.dt_update,e.ds_empresa,l.ds_localizacao FROM tb_chamados c
         left join tb_usuario u1 on u1.id_usuario = c.id_usuario
         left join rl_chamado_usuario rl on rl.id_chamado = c.id_chamado
         left join tb_usuario u2 on u2.id_usuario = rl.id_usuario
+        left join tb_localizacao l on l.id_localizacao = c.id_localizacao
+        left join tb_empresa e on e.id_empresa = c.id_empresa
         left join (select id_chamado,dt_update from tb_historico_status_chamado order by dt_update desc limit 1)  hc on c.id_chamado = hc.id_chamado
         where c.id_chamado = :id_chamado";
 
@@ -859,7 +861,7 @@ class Chamados
         $sql = "
         SELECT u.nu_telefone
         FROM tb_usuario u
-        inner join tb_chamado c on c.id_usuario = u.id_usuario
+        inner join tb_chamados c on c.id_usuario = u.id_usuario
         WHERE c.id_chamado = :id_chamado
         limit 1";
 
