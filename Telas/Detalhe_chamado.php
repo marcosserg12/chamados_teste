@@ -17,7 +17,7 @@ $geral = new Geral();
 $dados = $chamados->mostrarChamado($id_chamado);
 $dados_arquivos = $chamados->mostrararquivosChamado($id_chamado);
 $historicos = $chamados->lista_historico($id_chamado);
-$lista_usuarios = $usuario->listarUsuario_adm($id_usuario);
+$lista_usuarios = $usuario->listarUsuario_adm($dados['id_usuario_designado']);
 
 $lista_empresas = $chamados->lista_empresas();
 $lista_localizacao = $chamados->lista_localizacao($dados['id_empresa']);

@@ -117,11 +117,11 @@ class Usuario
         $con = Conecta::getConexao();
 
         if ($id_usuario === null) {
-            $select = "SELECT * FROM tb_usuario where id_perfil = 1";
+            $select = "SELECT * FROM tb_usuario where id_perfil = 4 or id_usuario = 23 order by ds_nome asc";
             $stmt = $con->prepare($select);
             $stmt->execute();
         } else {
-            $select = "SELECT * FROM tb_usuario WHERE id_usuario != :id_usuario and id_perfil = 1";
+            $select = "SELECT * FROM tb_usuario WHERE id_usuario != :id_usuario and id_perfil = 4 or id_usuario = 23 order by ds_nome asc";
             $stmt = $con->prepare($select);
             $stmt->execute([':id_usuario' => $id_usuario]);
         }

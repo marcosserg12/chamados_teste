@@ -44,6 +44,14 @@
                     </a>
                 </li>
             <?php endif; ?>
+            <?php if (Security::getUser()['id_perfil'] == 1) : ?>
+                <li class="mb-2 " id="adminTicketsLink">
+                    <a href="../Telas/Administrativo.php" class="flex items-center p-2 text-gray-700 rounded-lg hover:bg-blue-50">
+                        <i class="fas fa-screwdriver-wrench mr-3"></i>
+                        <span>Administrativo</span>
+                    </a>
+                </li>
+            <?php endif; ?>
         </ul>
     </nav>
     <div class="absolute bottom-0 w-full p-4 border-t border-gray-200">

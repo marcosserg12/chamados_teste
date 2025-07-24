@@ -27,7 +27,7 @@ class Chamados
     function listaChamadosRecentes($id_perfil, $id_usuario)
     {
         $con = Conecta::getConexao();
-        if ($id_perfil == 1 || $id_perfil == 4 ) {
+        if ($id_perfil == 1 || $id_perfil == 4) {
             $where = "rl.id_usuario = " . $id_usuario . " or c.st_status = 0";
         } else if ($id_perfil == 3) {
             $where = "r2.id_usuario = " . $id_usuario . " ";
@@ -52,7 +52,7 @@ class Chamados
         return $dados;
     }
 
-    function totalChamados($id_perfil, $id_usuario)
+    function totalChamadosPorUsuario($id_perfil, $id_usuario)
     {
         $con = Conecta::getConexao();
         if ($id_perfil == 1) {
@@ -278,8 +278,8 @@ class Chamados
     {
         $con = Conecta::getConexao();
         if ($id_perfil == 1) {
-            $where = "rl.id_usuario = " . $id_usuario . " or c.id_usuario =" . $id_usuario ;
-        }  else {
+            $where = "rl.id_usuario = " . $id_usuario . " or c.id_usuario =" . $id_usuario;
+        } else {
             $where = "c.id_usuario = " . $id_usuario;
         }
 
@@ -298,7 +298,7 @@ class Chamados
 
         return $dados;
     }
-    function todosChamados($id_perfil,$id_usuario)
+    function todosChamados($id_perfil, $id_usuario)
     {
         $con = Conecta::getConexao();
 
@@ -803,9 +803,9 @@ class Chamados
 
         $resultado = $stmt->fetchAll();
 
-        return $resultado ;
+        return $resultado;
     }
-        function buscarNumeroPeloUsr($id_usuario): ?string
+    function buscarNumeroPeloUsr($id_usuario): ?string
     {
         $connection = Conecta::getConexao();
 
@@ -824,7 +824,7 @@ class Chamados
     }
 
 
-    function numerosGestores($id_empresa,$id_localizacao)
+    function numerosGestores($id_empresa, $id_localizacao)
     {
         $connection = Conecta::getConexao();
 
@@ -840,10 +840,10 @@ class Chamados
 
         $resultado = $stmt->fetchAll();
 
-        return $resultado ;
+        return $resultado;
     }
 
-    function infoLocEmpresa($id_empresa,$id_localizacao)
+    function infoLocEmpresa($id_empresa, $id_localizacao)
     {
         $connection = Conecta::getConexao();
 
@@ -860,9 +860,9 @@ class Chamados
 
         $resultado = $stmt->fetch();
 
-        return $resultado ;
+        return $resultado;
     }
-        function telefoneDono($id_chamado): ?string
+    function telefoneDono($id_chamado): ?string
     {
         $connection = Conecta::getConexao();
 
@@ -879,5 +879,108 @@ class Chamados
         $resultado = $stmt->fetch(PDO::FETCH_ASSOC);
 
         return $resultado ? $resultado['nu_telefone'] : null;
+    }
+    function totalChamados()
+    {
+        $con = Conecta::getConexao();
+
+
+        $select = "SELECT  COUNT(CASE WHEN c.st_status = 0 THEN 1 END) AS aberto,
+            COUNT(CASE WHEN c.st_status = 1 THEN 1 END) AS andamento,
+            COUNT(CASE WHEN c.st_status = 9 THEN 1 END) AS resolvidos
+        FROM tb_chamados c
+        left join tb_usuario u1 on u1.id_usuario = c.id_usuario
+        left join rl_chamado_usuario rl on rl.id_chamado = c.id_chamado
+        left join tb_usuario u2 on u2.id_usuario = rl.id_usuario
+        order by c.id_chamado desc ";
+
+        $stmt = $con->prepare($select);
+
+
+        $stmt->execute();
+        $dados = $stmt->fetch();
+
+        return $dados;
+    }
+    function totalChamadosSemanas()
+    {
+        $con = Conecta::getConexao();
+
+        $sql = "SELECT
+            -- Semana Atual
+            SUM(CASE WHEN WEEK(c.dt_data_chamado, 1) = WEEK(CURDATE(), 1) AND YEAR(c.dt_data_chamado) = YEAR(CURDATE()) AND c.st_status = 0 THEN 1 ELSE 0 END) AS aberto_atual,
+            SUM(CASE WHEN WEEK(c.dt_data_chamado, 1) = WEEK(CURDATE(), 1) AND YEAR(c.dt_data_chamado) = YEAR(CURDATE()) AND c.st_status = 1 THEN 1 ELSE 0 END) AS andamento_atual,
+            SUM(CASE WHEN WEEK(c.dt_data_chamado, 1) = WEEK(CURDATE(), 1) AND YEAR(c.dt_data_chamado) = YEAR(CURDATE()) AND c.st_status = 9 THEN 1 ELSE 0 END) AS resolvidos_atual,
+
+            -- Semana Anterior
+            SUM(CASE WHEN WEEK(c.dt_data_chamado, 1) = WEEK(CURDATE(), 1) - 1 AND YEAR(c.dt_data_chamado) = YEAR(CURDATE()) AND c.st_status = 0 THEN 1 ELSE 0 END) AS aberto_anterior,
+            SUM(CASE WHEN WEEK(c.dt_data_chamado, 1) = WEEK(CURDATE(), 1) - 1 AND YEAR(c.dt_data_chamado) = YEAR(CURDATE()) AND c.st_status = 1 THEN 1 ELSE 0 END) AS andamento_anterior,
+            SUM(CASE WHEN WEEK(c.dt_data_chamado, 1) = WEEK(CURDATE(), 1) - 1 AND YEAR(c.dt_data_chamado) = YEAR(CURDATE()) AND c.st_status = 9 THEN 1 ELSE 0 END) AS resolvidos_anterior
+        FROM tb_chamados c
+    ";
+
+        $stmt = $con->prepare($sql);
+        $stmt->execute();
+        $dados = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        return $dados;
+    }
+    function chamadosTecnico()
+    {
+        $con = Conecta::getConexao();
+
+
+        $select = "SELECT
+                    u2.id_usuario,
+                    u2.ds_nome,
+                    u2.ds_email,
+                    COUNT(CASE WHEN c.st_status = 1 THEN 1 END) AS andamento,
+                    COUNT(CASE WHEN c.st_status = 9 THEN 1 END) AS resolvidos
+                FROM tb_usuario u2
+                LEFT JOIN rl_chamado_usuario rl ON u2.id_usuario = rl.id_usuario
+                LEFT JOIN tb_chamados c ON c.id_chamado = rl.id_chamado
+                WHERE u2.id_perfil = 4
+                GROUP BY u2.ds_nome, u2.ds_email, u2.id_usuario
+                ORDER BY u2.ds_nome ASC;";
+
+        $stmt = $con->prepare($select);
+
+
+        $stmt->execute();
+        $dados = $stmt->fetchAll();
+
+        return $dados;
+    }
+    function ultimosChamadosTecnico($id_usuario)
+    {
+        $con = Conecta::getConexao();
+
+
+        $select = "SELECT
+            c.id_chamado,
+            c.ds_titulo,
+            c.ds_descricao,
+            c.st_status,
+            rl.dt_aceito,
+            (
+                SELECT h.dt_update
+                FROM tb_historico_status_chamado h
+                WHERE h.id_chamado = c.id_chamado
+                ORDER BY h.dt_update DESC
+                LIMIT 1
+            ) AS ultima_atualizacao
+        FROM rl_chamado_usuario rl
+        INNER JOIN tb_chamados c ON c.id_chamado = rl.id_chamado
+        WHERE rl.id_usuario = ?
+        ORDER BY rl.dt_aceito DESC
+        LIMIT 5";
+
+        $stmt = $con->prepare($select);
+
+
+        $stmt->execute([$id_usuario]);
+        $dados = $stmt->fetchAll();
+
+        return $dados;
     }
 }

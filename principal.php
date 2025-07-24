@@ -15,7 +15,7 @@ if (!Security::isAuthenticated()) {
 $chamados = new Chamados();
 $geral = new Geral();
 $dados = $chamados->listaChamadosRecentes(Security::getUser()['id_perfil'], Security::getUser()['id_usuario']);
-$totalchamados = $chamados->totalChamados(Security::getUser()['id_perfil'], Security::getUser()['id_usuario']);
+$totalchamados = $chamados->totalChamadosPorUsuario(Security::getUser()['id_perfil'], Security::getUser()['id_usuario']);
 
 ?>
 
