@@ -88,15 +88,15 @@ if ($dados['st_status'] == 0) {
                             </div>
                             <?php if ($id_perfil == 1 || $id_perfil == 4) { ?>
                                 <div id="adminTicketActions">
-                                    <div class="flex space-x-2">
+                                    <div class="flex flex-wrap gap-2">
                                         <?php if ($dados['st_status'] != 9): ?>
                                             <?php if ($dados['id_usuario_designado'] != $id_usuario): ?>
-                                                <button id="assignToMeBtn" onclick="assumirChamado()" class="bg-blue-100 text-blue-700 px-3 py-1 rounded-md text-sm flex items-center">
+                                                <button id="assignToMeBtn" onclick="assumirChamado()" class="bg-blue-100 text-blue-700 px-3 py-2 rounded-md text-sm flex items-center justify-center">
                                                     <i class="fas fa-user-plus mr-1"></i> Assumir
                                                 </button>
                                             <?php endif; ?>
                                             <div class="relative">
-                                                <button id="assignDropdownBtn" class="bg-gray-100 text-gray-700 px-3 py-1 rounded-md text-sm flex items-center">
+                                                <button id="assignDropdownBtn" class="bg-gray-100 text-gray-700 px-3 py-2 rounded-md text-sm flex items-center justify-center">
                                                     <i class="fas fa-users mr-1"></i> Designar
                                                     <i class="fas fa-chevron-down ml-1"></i>
                                                 </button>
@@ -115,26 +115,34 @@ if ($dados['st_status'] == 0) {
                                             </div>
                                         <?php endif; ?>
                                     <?php } ?>
-                                    <?php if ($dados['st_status'] != 0): ?>
-                                        <?php if ($id_perfil == 1 || $id_perfil == 4) { ?>
-                                            <button id="resolveTicketBtn" onclick="resolver_reabrir(<?= $id_usuario ?>,<?= $dados['id_chamado'] ?>,0)" class="bg-orange-100 text-orange-700 px-3 py-1 rounded-md text-sm flex items-center"><i class="fas fa-redo mr-1"></i> Reabrir Chamado
-                                            <?php } ?>
-                                        <?php endif; ?>
-                                        <?php if ($dados['st_status'] != 9 && $dados['designado'] != null): ?>
-                                            <button id="resolveTicketBtn" onclick="resolver_reabrir(<?= $id_usuario ?>,<?= $dados['id_chamado'] ?>,9)" class="bg-green-100 text-green-700 px-3 py-1 rounded-md text-sm flex items-center"><i class="fas fa-check mr-1"></i> Resolvido
-                                            </button>
-                                        <?php endif; ?>
-                                        <?php if (($dados['id_usuario_designado'] == $id_usuario || $dados['id_usuario'] == $id_usuario) && $dados['st_status'] != 9): ?>
-                                            <a href="../Telas/Editar_chamado.php?id_chamado=<?= $dados['id_chamado'] ?>" class="bg-purple-100 text-purple-700 px-3 py-1 rounded-md text-sm flex items-center">
-                                                <i class="fas fa-edit mr-1"></i> Editar
-                                            </a>
-                                        <?php endif; ?>
-                                        <?php if ($id_perfil == 2 && $dados['st_status'] == 9 && $intervalo <= 1): ?>
-                                            <button id="resolveTicketBtn" onclick="resolver_reabrir(<?= $id_usuario ?>,<?= $dados['id_chamado'] ?>,0)" class="bg-orange-100 text-orange-700 px-3 py-1 rounded-md text-sm flex items-center"><i class="fas fa-redo mr-1"></i> Reabrir Chamado
-                                            <?php endif; ?>
 
+                                    <?php if ($dados['st_status'] != 0 && ($id_perfil == 1 || $id_perfil == 4)) : ?>
+                                        <button id="resolveTicketBtn" onclick="resolver_reabrir(<?= $id_usuario ?>,<?= $dados['id_chamado'] ?>,0)" class="bg-orange-100 text-orange-700 px-3 py-2 rounded-md text-sm flex items-center justify-center">
+                                            <i class="fas fa-redo mr-1"></i> Reabrir Chamado
+                                        </button>
+                                    <?php endif; ?>
+
+                                    <?php if ($dados['st_status'] != 9 && $dados['designado'] != null): ?>
+                                        <button id="resolveTicketBtn" onclick="resolver_reabrir(<?= $id_usuario ?>,<?= $dados['id_chamado'] ?>,9)" class="bg-green-100 text-green-700 px-3 py-2 rounded-md text-sm flex items-center justify-center">
+                                            <i class="fas fa-check mr-1"></i> Resolvido
+                                        </button>
+                                    <?php endif; ?>
+
+                                    <?php if (($dados['id_usuario_designado'] == $id_usuario || $dados['id_usuario'] == $id_usuario) && $dados['st_status'] != 9): ?>
+                                        <a href="../Telas/Editar_chamado.php?id_chamado=<?= $dados['id_chamado'] ?>" class="bg-purple-100 text-purple-700 px-3 py-2 rounded-md text-sm flex items-center justify-center">
+                                            <i class="fas fa-edit mr-1"></i> Editar
+                                        </a>
+                                    <?php endif; ?>
+
+                                    <?php if ($id_perfil == 2 && $dados['st_status'] == 9 && $intervalo <= 1): ?>
+                                        <button id="resolveTicketBtn" onclick="resolver_reabrir(<?= $id_usuario ?>,<?= $dados['id_chamado'] ?>,0)" class="bg-orange-100 text-orange-700 px-3 py-2 rounded-md text-sm flex items-center justify-center">
+                                            <i class="fas fa-redo mr-1"></i> Reabrir Chamado
+                                        </button>
+                                    <?php endif; ?>
                                     </div>
                                 </div>
+
+
 
                         </div>
                     </div>
