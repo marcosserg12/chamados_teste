@@ -35,7 +35,7 @@ class Chamados
             $where = "c.id_usuario = " . $id_usuario;
         }
 
-        $select = "SELECT c.*,u1.ds_nome,u2.ds_nome,rl.dt_aceito FROM tb_chamados c
+        $select = "SELECT DISTINCT c.*,u1.ds_nome,u2.ds_nome,rl.dt_aceito FROM tb_chamados c
         left join tb_usuario u1 on u1.id_usuario = c.id_usuario
         left join rl_chamado_usuario rl on rl.id_chamado = c.id_chamado
         left join tb_usuario u2 on u2.id_usuario = rl.id_usuario
@@ -283,7 +283,7 @@ class Chamados
             $where = "c.id_usuario = " . $id_usuario;
         }
 
-        $select = "SELECT Distinct c.*,u1.ds_nome,u2.ds_nome,rl.dt_aceito FROM tb_chamados c
+        $select = "SELECT DISTINCT c.*,u1.ds_nome,u2.ds_nome,rl.dt_aceito FROM tb_chamados c
         left join tb_usuario u1 on u1.id_usuario = c.id_usuario
         left join rl_chamado_usuario rl on rl.id_chamado = c.id_chamado
         left join tb_usuario u2 on u2.id_usuario = rl.id_usuario
@@ -308,7 +308,7 @@ class Chamados
             $where = "";
         }
 
-        $select = "SELECT c.*,u1.ds_nome as criado,u2.ds_nome as atribuido,rl.dt_aceito FROM tb_chamados c
+        $select = "SELECT DISTINCT c.*,u1.ds_nome as criado,u2.ds_nome as atribuido,rl.dt_aceito FROM tb_chamados c
         left join tb_usuario u1 on u1.id_usuario = c.id_usuario
         LEFT JOIN rl_chamado_usuario rl ON rl.id_chamado = c.id_chamado
         left join tb_usuario u2 on u2.id_usuario = rl.id_usuario
