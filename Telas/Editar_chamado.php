@@ -405,7 +405,7 @@ $dados_arquivos = $chamados->mostrararquivosChamado($id_chamado);
                     success: function(data) {
                         let options = '<option value="">Selecione o detalhe</option>';
                         data.forEach(function(item) {
-                            options += `<option value="${item.id_motivo_principal}">${item.ds_descricao_motivo}</option>`;
+                            options += `<option value="${item.id_motivo_associado}">${item.ds_descricao_motivo}</option>`;
                         });
                         $('#motivo_associado').html(options).trigger('change.select2');
                     },
@@ -424,7 +424,7 @@ $dados_arquivos = $chamados->mostrararquivosChamado($id_chamado);
                     success: function(data) {
                         let options = '<option value="">Selecione o detalhe</option>';
                         data.forEach(function(item) {
-                            options += `<option value="${item.id_motivo_principal}">${item.ds_descricao_motivo}</option>`;
+                            options += `<option value="${item.id_motivo_associado}">${item.ds_descricao_motivo}</option>`;
                         });
                         $('#motivo_associado').html(options).trigger('change.select2');
                     },
@@ -453,7 +453,7 @@ $dados_arquivos = $chamados->mostrararquivosChamado($id_chamado);
                     success: function(data) {
                         let options = '<option value="">Selecione o detalhe</option>';
                         data.forEach(function(item) {
-                            options += `<option value="${item.id_motivo_principal}">${item.ds_descricao_motivo}</option>`;
+                            options += `<option value="${item.id_motivo_associado}">${item.ds_descricao_motivo}</option>`;
                         });
                         $('#motivo_associado').html(options).trigger('change.select2');
                     },
