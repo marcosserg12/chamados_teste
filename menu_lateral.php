@@ -36,7 +36,7 @@
                     </a>
                 </li>
             <?php endif; ?>
-            <?php if (in_array(Security::getUser()['id_perfil'], [1, 4])) : ?>
+            <?php if (in_array(Security::getUser()['id_perfil'], [1, 3, 4])) : ?>
                 <li class="mb-2 " id="adminTicketsLink">
                     <a href="../Telas/Todos_chamados.php" class="flex items-center p-2 text-gray-700 rounded-lg hover:bg-blue-50">
                         <i class="fas fa-clipboard-list mr-3"></i>

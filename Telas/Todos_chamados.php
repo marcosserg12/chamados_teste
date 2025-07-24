@@ -8,13 +8,13 @@ require '../vendor/autoload.php';
 if (!Security::isAuthenticated()) {
     redirect('../index.php');
 }
-if (!in_array(Security::getUser()['id_perfil'], [1, 4])) {
+if (!in_array(Security::getUser()['id_perfil'], [1, 3, 4])) {
     redirect('../index.php');
 }
 
 $chamados = new Chamados();
 $geral = new Geral();
-$dados = $chamados->todosChamados();
+$dados = $chamados->todosChamados(Security::getUser()['id_perfil'], Security::getUser()['id_usuario']);
 ?>
 
 <body class="bg-gray-100 font-sans">

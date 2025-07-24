@@ -27,8 +27,10 @@ class Chamados
     function listaChamadosRecentes($id_perfil, $id_usuario)
     {
         $con = Conecta::getConexao();
-        if ($id_perfil == 1) {
+        if ($id_perfil == 1 || $id_perfil == 4 ) {
             $where = "rl.id_usuario = " . $id_usuario . " or c.st_status = 0";
+        } else if ($id_perfil == 3) {
+            $where = "r2.id_usuario = " . $id_usuario . " ";
         } else {
             $where = "c.id_usuario = " . $id_usuario;
         }
@@ -37,6 +39,7 @@ class Chamados
         left join tb_usuario u1 on u1.id_usuario = c.id_usuario
         left join rl_chamado_usuario rl on rl.id_chamado = c.id_chamado
         left join tb_usuario u2 on u2.id_usuario = rl.id_usuario
+        INNER JOIN rl_usuario_empresa_localizacao r2 ON r2.id_localizacao = c.id_localizacao
         where $where
         order by c.id_chamado desc limit 10";
 
@@ -276,9 +279,7 @@ class Chamados
         $con = Conecta::getConexao();
         if ($id_perfil == 1) {
             $where = "rl.id_usuario = " . $id_usuario . " ";
-        } else if ($id_perfil == 3) {
-            $where = "r2.id_usuario = " . $id_usuario . " ";
-        } else {
+        }  else {
             $where = "c.id_usuario = " . $id_usuario;
         }
 
@@ -286,7 +287,6 @@ class Chamados
         left join tb_usuario u1 on u1.id_usuario = c.id_usuario
         left join rl_chamado_usuario rl on rl.id_chamado = c.id_chamado
         left join tb_usuario u2 on u2.id_usuario = rl.id_usuario
-        INNER JOIN rl_usuario_empresa_localizacao r2 ON r2.id_localizacao = c.id_localizacao
         where $where
         order by c.id_chamado desc";
 
@@ -298,14 +298,22 @@ class Chamados
 
         return $dados;
     }
-    function todosChamados()
+    function todosChamados($id_perfil,$id_usuario)
     {
         $con = Conecta::getConexao();
+
+        if ($id_perfil == 3) {
+            $where = "Where r2.id_usuario = " . $id_usuario . " ";
+        } else {
+            $where = "";
+        }
 
         $select = "SELECT c.*,u1.ds_nome as criado,u2.ds_nome as atribuido,rl.dt_aceito FROM tb_chamados c
         left join tb_usuario u1 on u1.id_usuario = c.id_usuario
         LEFT JOIN rl_chamado_usuario rl ON rl.id_chamado = c.id_chamado
         left join tb_usuario u2 on u2.id_usuario = rl.id_usuario
+        INNER JOIN rl_usuario_empresa_localizacao r2 ON r2.id_localizacao = c.id_localizacao
+        $where
         order by c.dt_data_chamado desc";
 
         $stmt = $con->prepare($select);
