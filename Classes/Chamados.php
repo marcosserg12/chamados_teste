@@ -278,7 +278,7 @@ class Chamados
     {
         $con = Conecta::getConexao();
         if ($id_perfil == 1) {
-            $where = "rl.id_usuario = " . $id_usuario . " ";
+            $where = "rl.id_usuario = " . $id_usuario . " or c.id_usuario =" . $id_usuario ;
         }  else {
             $where = "c.id_usuario = " . $id_usuario;
         }
