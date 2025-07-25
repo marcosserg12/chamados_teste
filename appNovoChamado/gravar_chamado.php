@@ -25,7 +25,7 @@ try {
                 $numero_tecnico = '55' . $nu_telefone_tecnico['nu_telefone'];
                 $mensagemTecnico = "Novo chamado aberto #{$id_chamado}: {$_POST['ds_titulo']}\n".
                                 "Empresa: {$loc_empresa['ds_empresa']}\n".
-                                "* Confira em: * \n" .
+                                "*Confira em:* \n" .
                                 "https://chamados.sisibranutro.com.br/Telas/Detalhe_chamado.php?id_chamado={$id_chamado}";
                 $result = $evolutionSender->sendMessage($numero_tecnico, $mensagemTecnico);
             }
@@ -34,7 +34,7 @@ try {
             $mensagemTecnico = "Novo chamado aberto #{$id_chamado}: {$_POST['ds_titulo']}\n".
                                 "Localização: {$loc_empresa['ds_localizacao']}\n".
                                 "Empresa: {$loc_empresa['ds_empresa']}\n".
-                                "* Confira em: * \n" .
+                                "*Confira em:* \n" .
                                 "https://chamados.sisibranutro.com.br/Telas/Detalhe_chamado.php?id_chamado={$id_chamado}";
             $result = $evolutionSender->sendMessage($numero_tecnico, $mensagemTecnico);
         }
@@ -45,7 +45,7 @@ try {
         $mensagemGestor = "Novo chamado aberto #{$id_chamado}: {$_POST['ds_titulo']}\n".
                                 "Localização: {$loc_empresa['ds_localizacao']}\n".
                                 "Empresa: {$loc_empresa['ds_empresa']}\n".
-                                "* Confira em: * \n" .
+                                "*Confira em:* \n" .
                                 "https://chamados.sisibranutro.com.br/Telas/Detalhe_chamado.php?id_chamado={$id_chamado}";
         $numero_gestor = '55' . $nu_telefone_gestor['nu_telefone'];
         $result = $evolutionSender->sendMessage($numero_gestor, $mensagemGestor);
@@ -54,7 +54,7 @@ try {
     // Envia mensagem para o dono do chamado
     // $mensagemDono = "Chamado aberto #{$id_chamado}: {$_POST['ds_titulo']} ";
     $mensagemDono = "Chamado aberto #{$id_chamado}: {$_POST['ds_titulo']}\n".
-                    "* Confira em: * \n" .
+                    "*Confira em:* \n" .
                     "https://chamados.sisibranutro.com.br/Telas/Detalhe_chamado.php?id_chamado={$id_chamado}";
 
 

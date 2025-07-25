@@ -38,7 +38,7 @@ try {
             "Status: {$st_status}\n" .
             "Localização: {$dados['ds_localizacao']}\n" .
             "Empresa: {$dados['ds_empresa']}\n" .
-            "* Confira em: * \n" .
+            "*Confira em:* \n" .
             "https://chamados.sisibranutro.com.br/Telas/Detalhe_chamado.php?id_chamado={$_POST['id_chamado']}";
         $numero_gestor = '55' . $nu_telefone_gestor['nu_telefone'];
         $evolutionSender->sendMessage($numero_gestor, $mensagemGestor);
@@ -49,7 +49,7 @@ try {
                     "Status: {$st_status}\n" .
                     "Localização: {$dados['ds_localizacao']}\n" .
                     "Empresa: {$dados['ds_empresa']}\n" .
-                    "* Confira em: * \n" .
+                    "*Confira em:* \n" .
                     "https://chamados.sisibranutro.com.br/Telas/Detalhe_chamado.php?id_chamado={$_POST['id_chamado']}";
 
 

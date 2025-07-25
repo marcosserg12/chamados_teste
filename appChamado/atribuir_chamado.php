@@ -23,7 +23,7 @@ try{
                     "Titulo: {$dados['ds_titulo']}\n" .
                     "Localização: {$dados['ds_localizacao']}\n" .
                     "Empresa: {$dados['ds_empresa']}\n" .
-                    "* Confira em: * \n" .
+                    "*Confira em:* \n" .
                     "https://chamados.sisibranutro.com.br/Telas/Detalhe_chamado.php?id_chamado={$_POST['id_chamado']}";
 
 
@@ -35,7 +35,7 @@ try{
                     "Titulo: {$dados['ds_titulo']}\n" .
                     "Localização: {$dados['ds_localizacao']}\n" .
                     "Empresa: {$dados['ds_empresa']}\n" .
-                    "* Confira em: * \n" .
+                    "*Confira em:* \n" .
                     "https://chamados.sisibranutro.com.br/Telas/Detalhe_chamado.php?id_chamado={$_POST['id_chamado']}";
 
 

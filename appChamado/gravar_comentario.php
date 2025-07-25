@@ -17,7 +17,7 @@ try {
 
     $messageText = "Novo comentário no chamado #{$id_chamado}: \n".
                     "{$_POST['ds_comentario']}\n".
-                    "* Confira em: * \n" .
+                    "*Confira em:* \n" .
                     "https://chamados.sisibranutro.com.br/Telas/Detalhe_chamado.php?id_chamado={$id_chamado}";
 
     $responsavel = '55' . $nu_telefone_responsavel; // Ajuste para o número desejado
