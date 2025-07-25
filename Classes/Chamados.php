@@ -55,7 +55,7 @@ class Chamados
     function totalChamadosPorUsuario($id_perfil, $id_usuario)
     {
         $con = Conecta::getConexao();
-        if ($id_perfil == 1) {
+        if ($id_perfil == 1|| $id_perfil == 4) {
             $where = "rl.id_usuario = " . $id_usuario . " or c.st_status = 0";
         } else {
             $where = "c.id_usuario = " . $id_usuario;

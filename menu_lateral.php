@@ -1,3 +1,7 @@
+<?php
+$usuario = new Usuario();
+$ds_perfil = $usuario->buscarPerfil(Security::getUser()['id_perfil']);
+?>
 <div class="md:hidden fixed top-4 left-4 z-40">
     <button id="menuToggle" class="p-2 rounded-md bg-blue-600 text-white">
         <i class="fas fa-bars"></i>
@@ -6,7 +10,7 @@
 <div id="sidebar" class="sidebar bg-white w-64 h-screen fixed shadow-lg">
     <div class="p-4 border-b border-gray-200">
         <h1 class="text-xl font-bold text-gray-800">Sistema de Chamados</h1>
-        <p class="text-sm text-gray-600" id="userRoleDisplay"><?= Security::getUser()['id_perfil'] == 1 ? 'Administrador' : 'Usuário' ?></p>
+        <p class="text-sm text-gray-600" id="userRoleDisplay"><?=  $ds_perfil['ds_perfil'] ?></p>
     </div>
     <nav class="p-4">
         <ul>

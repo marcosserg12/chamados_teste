@@ -611,4 +611,23 @@ class Usuario
 
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
+    public function buscarPerfil($id_perfil)
+    {
+        $con = Conecta::getConexao();
+        $select = "SELECT
+                            ds_perfil,
+                            id_perfil
+                        FROM
+                            tb_perfil
+						WHERE
+						    id_perfil = :id_perfil";
+
+        $stmt = $con->prepare($select);
+
+        $params = array(
+            ':id_perfil' => $id_perfil
+        );
+        $stmt->execute($params);
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
 }
