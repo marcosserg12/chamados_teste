@@ -1,5 +1,9 @@
 <html lang="pt-BR">
 <?php
+ini_set('session.gc_maxlifetime', 86400);
+ini_set('session.cookie_lifetime', 86400);
+
+// Inicia a sessão com as configurações acima
 session_start();
 
 if (!isset($_SESSION['user'])) {
