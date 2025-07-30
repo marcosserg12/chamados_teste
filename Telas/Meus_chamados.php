@@ -110,7 +110,7 @@ $dados = $chamados->meusChamados(Security::getUser()['id_perfil'], Security::get
     <script>
         $(document).ready(function() {
             const table = $('#tabelaChamados').DataTable({
-                ordering: true,
+                ordering: false,
                 responsive: true, // permite adaptação automática
                 dom: `
                 <"w-full"t>

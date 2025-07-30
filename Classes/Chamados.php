@@ -277,7 +277,7 @@ class Chamados
     function meusChamados($id_perfil, $id_usuario)
     {
         $con = Conecta::getConexao();
-        if ($id_perfil == 1) {
+        if ($id_perfil == 1 || $id_perfil == 4) {
             $where = "rl.id_usuario = " . $id_usuario . " or c.id_usuario =" . $id_usuario;
         } else {
             $where = "c.id_usuario = " . $id_usuario;
@@ -314,7 +314,7 @@ class Chamados
         left join tb_usuario u2 on u2.id_usuario = rl.id_usuario
         INNER JOIN rl_usuario_empresa_localizacao r2 ON r2.id_localizacao = c.id_localizacao
         $where
-        order by c.dt_data_chamado desc";
+        order by c.id_chamado desc,c.dt_data_chamado desc";
 
         $stmt = $con->prepare($select);
         $stmt->execute();

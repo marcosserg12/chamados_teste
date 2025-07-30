@@ -111,7 +111,7 @@ $dados = $chamados->todosChamados(Security::getUser()['id_perfil'], Security::ge
             let filtroAtribuicao = '';
             const meuNome = $('#nome_usuario').val();
             const table = $('#tabelaChamados').DataTable({
-                ordering: true,
+                ordering: false,
                 responsive: false, // permite adaptação automática
                 dom: `
                 <"w-full"t>
@@ -120,9 +120,7 @@ $dados = $chamados->todosChamados(Security::getUser()['id_perfil'], Security::ge
                 <"mt-2 md:mt-0"p>
                 >
                 `,
-                order: [
-                    [1, 'desc']
-                ],
+
                 lengthMenu: [10, 15, 20, 30, 50, 80, 100],
                 pageLength: 10,
 
