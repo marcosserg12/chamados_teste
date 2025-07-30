@@ -247,7 +247,12 @@ class Chamados
         left join tb_usuario u2 on u2.id_usuario = rl.id_usuario
         left join tb_localizacao l on l.id_localizacao = c.id_localizacao
         left join tb_empresa e on e.id_empresa = c.id_empresa
-        left join (select id_chamado,dt_update from tb_historico_status_chamado order by dt_update desc limit 1)  hc on c.id_chamado = hc.id_chamado
+        LEFT JOIN (
+        SELECT id_chamado, MAX(dt_update) as dt_update
+            FROM tb_historico_status_chamado
+            GROUP BY id_chamado
+        ) hc ON c.id_chamado = hc.id_chamado
+
         where c.id_chamado = :id_chamado";
 
         $stmt = $con->prepare($select);
