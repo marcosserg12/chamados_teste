@@ -313,6 +313,13 @@ if ($dados['st_status'] == 0) {
                                                 <a href="' . $caminho . '" download class="text-gray-500 text-xs hover:underline">Baixar</a>
                                             </div>';
                                     }
+                                    else if ($extensao === 'pptx') {
+                                        echo '
+                                            <div class="border p-2 rounded shadow bg-white w-44">
+                                                <div class="text-sm text-gray-600 truncate mb-2">' . $nome . '</div>
+                                                <a href="' . $caminho . '" download class="text-gray-500 text-xs hover:underline">Baixar Power Point</a>
+                                            </div>';
+                                    }
                                 }
                                 ?>
                             </div>
