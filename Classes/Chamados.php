@@ -41,7 +41,7 @@ class Chamados
         left join tb_usuario u2 on u2.id_usuario = rl.id_usuario
         INNER JOIN rl_usuario_empresa_localizacao r2 ON r2.id_localizacao = c.id_localizacao
         where $where
-        order by c.id_chamado desc limit 10";
+        order by st_status = 1 desc, st_status = 0 desc,c.id_chamado desc limit 10";
 
         $stmt = $con->prepare($select);
 
