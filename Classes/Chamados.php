@@ -738,7 +738,6 @@ class Chamados
         $sql = "
         UPDATE tb_chamados
         SET
-            id_usuario = :id_usuario,
             ds_titulo = :ds_titulo,
             ds_descricao = :ds_descricao,
             id_empresa = :id_empresa,
@@ -753,7 +752,6 @@ class Chamados
         $stmt = $connection->prepare($sql);
         $stmt->execute([
             ':id_chamado' => $dados['id_chamado'],
-            ':id_usuario' => $dados['id_usuario'],
             ':ds_titulo' => $dados['ds_titulo'],
             ':ds_descricao' => $dados['ds_descricao'],
             ':id_empresa' => $dados['id_empresa'],
