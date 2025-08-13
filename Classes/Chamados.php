@@ -942,7 +942,7 @@ class Chamados
                 FROM tb_usuario u2
                 LEFT JOIN rl_chamado_usuario rl ON u2.id_usuario = rl.id_usuario
                 LEFT JOIN tb_chamados c ON c.id_chamado = rl.id_chamado
-                WHERE u2.id_perfil = 4
+                WHERE u2.id_perfil = 4 or u2.id_usuario = 47
                 GROUP BY u2.ds_nome, u2.ds_email, u2.id_usuario
                 ORDER BY u2.ds_nome ASC;";
 
