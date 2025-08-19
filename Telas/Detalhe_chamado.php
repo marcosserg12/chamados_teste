@@ -312,8 +312,7 @@ if ($dados['st_status'] == 0) {
                                                 </button>
                                                 <a href="' . $caminho . '" download class="text-gray-500 text-xs hover:underline">Baixar</a>
                                             </div>';
-                                    }
-                                    else if ($extensao === 'pptx') {
+                                    } else if ($extensao === 'pptx') {
                                         echo '
                                             <div class="border p-2 rounded shadow bg-white w-44">
                                                 <div class="text-sm text-gray-600 truncate mb-2">' . $nome . '</div>
@@ -496,18 +495,22 @@ if ($dados['st_status'] == 0) {
     document.getElementById('backFromDetailBtn').addEventListener('click', function() {
         window.location.href = '../Telas/Todos_chamados.php'
     });
-    const btn = document.getElementById('assignDropdownBtn');
-    const dropdown = document.getElementById('assignDropdown');
+    document.addEventListener('DOMContentLoaded', () => {
+        const btn = document.getElementById('assignDropdownBtn');
+        const dropdown = document.getElementById('assignDropdown');
 
-    btn.addEventListener('click', function(e) {
-        e.stopPropagation();
-        dropdown.classList.toggle('hidden');
-    });
+        // só adiciona os eventos se os elementos existirem
+        if (btn && dropdown) {
+            btn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                dropdown.classList.toggle('hidden');
+            });
 
-    // Fecha o dropdown ao clicar fora
-    document.addEventListener('click', function(e) {
-        if (!dropdown.contains(e.target) && !btn.contains(e.target)) {
-            dropdown.classList.add('hidden');
+            document.addEventListener('click', function(e) {
+                if (!dropdown.contains(e.target) && !btn.contains(e.target)) {
+                    dropdown.classList.add('hidden');
+                }
+            });
         }
     });
 
