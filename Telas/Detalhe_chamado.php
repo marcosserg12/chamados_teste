@@ -493,7 +493,7 @@ if ($dados['st_status'] == 0) {
 
 <script>
     document.getElementById('backFromDetailBtn').addEventListener('click', function() {
-        window.location.href = '../Telas/Todos_chamados.php'
+        window.location.href = '../Telas/Meus_Chamados.php'
     });
     document.addEventListener('DOMContentLoaded', () => {
         const btn = document.getElementById('assignDropdownBtn');
