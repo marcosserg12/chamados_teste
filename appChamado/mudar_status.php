@@ -33,11 +33,12 @@ try {
 
     // Envia mensagem para os números dos gestores
     foreach ($numero_gestao as $nu_telefone_gestor) {
-        $mensagemGestor = "Mudança de status do chamado #{$_POST['id_chamado']}: {$dados['ds_titulo']}\n" .
-            "Responsável: {$dados['designado']}\n" .
-            "Status: {$st_status}\n" .
-            "Localização: {$dados['ds_localizacao']}\n" .
-            "Empresa: {$dados['ds_empresa']}\n" .
+        $mensagemGestor = "Mudança de status do chamado *#{$_POST['id_chamado']}*: \n" .
+            "Título: *{$dados['ds_titulo']}* \n" .
+            "Responsável: *{$dados['designado']}* \n" .
+            "Status: *{$st_status}* \n" .
+            "Localização: *{$dados['ds_localizacao']}* \n" .
+            "Empresa: *{$dados['ds_empresa']}* \n" .
             "*Confira em:* \n" .
             "https://chamados.sisibranutro.com.br/Telas/Detalhe_chamado.php?id_chamado={$_POST['id_chamado']}";
         $numero_gestor = '55' . $nu_telefone_gestor['nu_telefone'];
@@ -45,10 +46,11 @@ try {
     }
 
     // Envia mensagem para o dono do chamado
-    $mensagemDono = "Mudança de status do chamado #{$_POST['id_chamado']}: {$dados['ds_titulo']}\n" .
-                    "Status: {$st_status}\n" .
-                    "Localização: {$dados['ds_localizacao']}\n" .
-                    "Empresa: {$dados['ds_empresa']}\n" .
+    $mensagemDono = "Mudança de status do chamado *#{$_POST['id_chamado']}*: \n" .
+                    "Título: *{$dados['ds_titulo']}* \n" .
+                    "Status: *{$st_status}* \n" .
+                    "Localização: *{$dados['ds_localizacao']}* \n" .
+                    "Empresa: *{$dados['ds_empresa']}* \n" .
                     "*Confira em:* \n" .
                     "https://chamados.sisibranutro.com.br/Telas/Detalhe_chamado.php?id_chamado={$_POST['id_chamado']}";
 

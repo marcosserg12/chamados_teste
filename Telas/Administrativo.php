@@ -25,7 +25,7 @@ $cores_tailwind = ['blue', 'green', 'red', 'yellow', 'indigo', 'purple', 'orange
     <?php include   '../menu_lateral.php'; ?>
     <div class="md:ml-64 min-h-screen">
         <?php include  '../header.php'; ?>
-        <main class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+        <main class="max-w-8xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
             <!-- Incluído conteúdo estático do painel -->
             <style>
                 .tech-card {

@@ -15,8 +15,8 @@ try {
         'teste'
     );
 
-    $messageText = "Novo comentário no chamado #{$id_chamado}: \n".
-                    "{$_POST['ds_comentario']}\n".
+    $messageText = "Novo comentário no chamado *#{$id_chamado}*: \n".
+                    "*{$_POST['ds_comentario']}* \n".
                     "*Confira em:* \n" .
                     "https://chamados.sisibranutro.com.br/Telas/Detalhe_chamado.php?id_chamado={$id_chamado}";
 

@@ -24,7 +24,7 @@ $lista_perfil = $usuario->listaPerfil();
     <div class="md:ml-64 min-h-screen">
         <?php include '../header.php'; ?>
 
-        <main class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+        <main class="max-w-8xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between items-center mb-6">
                 <h2 class="text-2xl font-semibold text-gray-800">Editar Usuário</h2>
                 <a href="Gerenciar_usuario.php" class="bg-gray-200 text-gray-700 px-4 py-2 rounded-md flex items-center">

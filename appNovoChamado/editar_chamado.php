@@ -18,8 +18,8 @@ try {
 
 
     // Envia mensagem para o responsável e dono do chamado
-    $mensagem = "Chamado #{$_POST['id_chamado']} Alterado: \n" .
-        "Titulo: {$_POST['ds_titulo']}\n" .
+    $mensagem = "Chamado *#{$_POST['id_chamado']}* Alterado: \n" .
+        "Titulo: *{$_POST['ds_titulo']}* \n" .
         "*Confira em:* \n" .
         "https://chamados.sisibranutro.com.br/Telas/Detalhe_chamado.php?id_chamado={$_POST['id_chamado']}";
 

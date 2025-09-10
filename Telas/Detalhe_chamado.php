@@ -51,7 +51,7 @@ if ($dados['st_status'] == 0) {
     <?php include   '../menu_lateral.php'; ?>
     <div class="md:ml-64 min-h-screen">
         <?php include   '../header.php'; ?>
-        <main class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+        <main class="max-w-8xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
             <input hidden id="id_usuario" name="id_usuario" value="<?php echo $id_usuario; ?>">
             <input hidden id="id_chamado" name="id_chamado" value="<?php echo $id_chamado; ?>">
             <div id="ticketDetailView">

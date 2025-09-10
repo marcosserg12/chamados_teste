@@ -23,17 +23,19 @@ try {
         if($_POST['id_tipo_chamado'] == 1){
             if($nu_telefone_tecnico['id_usuario'] == 41) {
                 $numero_tecnico = '55' . $nu_telefone_tecnico['nu_telefone'];
-                $mensagemTecnico = "Novo chamado aberto #{$id_chamado}: {$_POST['ds_titulo']}\n".
-                                "Empresa: {$loc_empresa['ds_empresa']}\n".
+                $mensagemTecnico = "Novo chamado aberto *#{$id_chamado}*:\n".
+                                "*{$_POST['ds_titulo']}* \n".
+                                "Empresa: *{$loc_empresa['ds_empresa']}* \n".
                                 "*Confira em:* \n" .
                                 "https://chamados.sisibranutro.com.br/Telas/Detalhe_chamado.php?id_chamado={$id_chamado}";
                 $result = $evolutionSender->sendMessage($numero_tecnico, $mensagemTecnico);
             }
         }else{
             $numero_tecnico = '55' . $nu_telefone_tecnico['nu_telefone'];
-            $mensagemTecnico = "Novo chamado aberto #{$id_chamado}: {$_POST['ds_titulo']}\n".
-                                "Localização: {$loc_empresa['ds_localizacao']}\n".
-                                "Empresa: {$loc_empresa['ds_empresa']}\n".
+            $mensagemTecnico = "Novo chamado aberto *#{$id_chamado}*:\n".
+                                "*{$_POST['ds_titulo']}* \n".
+                                "Localização: *{$loc_empresa['ds_localizacao']}* \n".
+                                "Empresa: *{$loc_empresa['ds_empresa']}* \n".
                                 "*Confira em:* \n" .
                                 "https://chamados.sisibranutro.com.br/Telas/Detalhe_chamado.php?id_chamado={$id_chamado}";
             $result = $evolutionSender->sendMessage($numero_tecnico, $mensagemTecnico);
@@ -42,9 +44,10 @@ try {
 
     // Envia mensagem para os números dos gestores
     foreach ($numero_gestao as $nu_telefone_gestor) {
-        $mensagemGestor = "Novo chamado aberto #{$id_chamado}: {$_POST['ds_titulo']}\n".
-                                "Localização: {$loc_empresa['ds_localizacao']}\n".
-                                "Empresa: {$loc_empresa['ds_empresa']}\n".
+        $mensagemGestor = "Novo chamado aberto *#{$id_chamado}*: \n".
+                                "*{$_POST['ds_titulo']}* \n".
+                                "Localização: *{$loc_empresa['ds_localizacao']}* \n".
+                                "Empresa: *{$loc_empresa['ds_empresa']}* \n".
                                 "*Confira em:* \n" .
                                 "https://chamados.sisibranutro.com.br/Telas/Detalhe_chamado.php?id_chamado={$id_chamado}";
         $numero_gestor = '55' . $nu_telefone_gestor['nu_telefone'];
@@ -52,8 +55,9 @@ try {
     }
 
     // Envia mensagem para o dono do chamado
-    // $mensagemDono = "Chamado aberto #{$id_chamado}: {$_POST['ds_titulo']} ";
-    $mensagemDono = "Chamado aberto #{$id_chamado}: {$_POST['ds_titulo']}\n".
+    // $mensagemDono = "Chamado aberto *#{$id_chamado}*: {$_POST['ds_titulo']} ";
+    $mensagemDono = "Chamado aberto *#{$id_chamado}*: \n".
+                    "*{$_POST['ds_titulo']}* \n".
                     "*Confira em:* \n" .
                     "https://chamados.sisibranutro.com.br/Telas/Detalhe_chamado.php?id_chamado={$id_chamado}";
 

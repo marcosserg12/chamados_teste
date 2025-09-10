@@ -20,9 +20,9 @@ try{
 
      // Envia mensagem para o responsável pelo chamado
     $mensagemResponsavel = "Chamado  foi atribuído para você : \n" .
-                    "Titulo: {$dados['ds_titulo']}\n" .
-                    "Localização: {$dados['ds_localizacao']}\n" .
-                    "Empresa: {$dados['ds_empresa']}\n" .
+                    "Titulo: *{$dados['ds_titulo']}* \n" .
+                    "Localização: *{$dados['ds_localizacao']}* \n" .
+                    "Empresa: *{$dados['ds_empresa']}* \n" .
                     "*Confira em:* \n" .
                     "https://chamados.sisibranutro.com.br/Telas/Detalhe_chamado.php?id_chamado={$_POST['id_chamado']}";
 
@@ -31,10 +31,10 @@ try{
     $evolutionSender->sendMessage($responsavel, $mensagemResponsavel);
 
      // Envia mensagem para o dono do chamado
-    $mensagemDono = "Chamado #{$_POST['id_chamado']} foi atribuído para: * {$dados['designado']} *: \n" .
-                    "Titulo: {$dados['ds_titulo']}\n" .
-                    "Localização: {$dados['ds_localizacao']}\n" .
-                    "Empresa: {$dados['ds_empresa']}\n" .
+    $mensagemDono = "Chamado *#{$_POST['id_chamado']}* foi atribuído para: *{$dados['designado']}*: \n" .
+                    "Titulo: *{$dados['ds_titulo']}* \n" .
+                    "Localização: *{$dados['ds_localizacao']}* \n" .
+                    "Empresa: *{$dados['ds_empresa']}* \n" .
                     "*Confira em:* \n" .
                     "https://chamados.sisibranutro.com.br/Telas/Detalhe_chamado.php?id_chamado={$_POST['id_chamado']}";
 
