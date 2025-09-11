@@ -82,6 +82,9 @@ $dados    = $chamados->todosChamados(Security::getUser()['id_perfil'], Security:
 
         /* ===================== MOBILE (<=767px) ===================== */
         @media (max-width: 767px) {
+            .pagination {
+                justify-content: center !important;
+            }
 
             /* esconde cabeçalho */
             #tabelaChamados thead {
@@ -195,7 +198,7 @@ $dados    = $chamados->todosChamados(Security::getUser()['id_perfil'], Security:
                         </div>
                     </div>
 
-                    <div class="overflow-x-auto" style="padding:20px;">
+                    <div style="padding:20px;">
                         <table id="tabelaChamados" class="w-full">
                             <thead class="bg-gray-50">
                                 <tr>
@@ -280,7 +283,10 @@ $dados    = $chamados->todosChamados(Security::getUser()['id_perfil'], Security:
 
             const table = $('#tabelaChamados').DataTable({
                 ordering: false,
-                responsive: false, // manter controle manual do layout
+                responsive: true, // manter controle manual do layout
+                rowReorder: {
+                    selector: 'td:nth-child(2)'
+                },
                 autoWidth: false, // evita inline widths que atrapalham no mobile
                 dom: `
         <"w-full"t>
