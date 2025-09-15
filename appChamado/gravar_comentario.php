@@ -15,10 +15,10 @@ try {
         'teste'
     );
 
-    $messageText = "Novo comentário no chamado *#{$id_chamado}*: \n".
+    $messageText = "Novo comentário no chamado *#{$_POST['id_chamado']}*: \n".
                     "*{$_POST['ds_comentario']}* \n".
                     "*Confira em:* \n" .
-                    "https://chamados.sisibranutro.com.br/Telas/Detalhe_chamado.php?id_chamado={$id_chamado}";
+                    "https://chamados.sisibranutro.com.br/Telas/Detalhe_chamado.php?id_chamado={$_POST['id_chamado']}";
 
     $responsavel = '55' . $nu_telefone_responsavel; // Ajuste para o número desejado
     $dono = '55' . $nu_telefone_dono; // Ajuste para o número desejado
