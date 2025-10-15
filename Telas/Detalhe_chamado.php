@@ -493,7 +493,7 @@ if ($dados['st_status'] == 0) {
 
 <script>
     document.getElementById('backFromDetailBtn').addEventListener('click', function() {
-        window.location.href = '../Telas/Meus_Chamados.php'
+        window.location.href = '../Telas/Meus_chamados.php'
     });
     document.addEventListener('DOMContentLoaded', () => {
         const btn = document.getElementById('assignDropdownBtn');
@@ -538,7 +538,7 @@ if ($dados['st_status'] == 0) {
                     data: dados,
                     success: function(response) {
                         $('#loader').hide();
-                        dropdown.classList.add('hidden');
+                        // dropdown.classList.add('hidden');
                         swal.fire({
                             title: "Designado!",
                             text: response.message,
