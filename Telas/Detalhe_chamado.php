@@ -252,6 +252,7 @@ if ($dados['st_status'] == 0) {
                                 <p class="text-gray-700">
                                     <?php echo $dados['st_grau'] == '1' ? 'Melhoria' : '' ?>
                                     <?php echo $dados['st_grau'] == '2' ? 'Problema' : '' ?>
+                                    <?php echo $dados['st_grau'] == '3' ? 'Cadastro de Paciente' : '' ?>
                                 </p>
                             </div>
                         </div>
