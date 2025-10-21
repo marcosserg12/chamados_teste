@@ -145,6 +145,10 @@ $dados_arquivos = $chamados->mostrararquivosChamado($id_chamado);
                                     <input type="radio" id="st_grau_2" <?php echo $dados['st_grau'] == '2' ? 'checked' : '' ?> name="st_grau" value="2" class="form-radio text-blue-600">
                                     <span class="ml-2 text-gray-700">Problema</span>
                                 </label>
+                                <label class="inline-flex items-center">
+                                    <input type="radio" id="st_grau_2" <?php echo $dados['st_grau'] == '3' ? 'checked' : '' ?> name="st_grau" value="3" class="form-radio text-blue-600">
+                                    <span class="ml-2 text-gray-700">Cadastro de Paciente</span>
+                                </label>
                             </div>
                         </div>
 
