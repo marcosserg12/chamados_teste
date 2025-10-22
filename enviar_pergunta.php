@@ -11,7 +11,7 @@ $token = "F32F86C62D6B-4092-940F-2965C534E61B";
 $url = $baseUrl . "message/sendList/" . $instance;
 
 // Número do destinatário (com domínio @s.whatsapp.net)
-$numero = "5561981098738"; // Exemplo
+$numero = "5561982616352"; // Exemplo
 
 // Corpo da requisição
 $data = [
