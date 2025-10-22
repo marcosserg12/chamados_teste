@@ -64,8 +64,10 @@ if (isset($data['data']['message']['listResponseMessage'])) {
     // Pega o título da opção que o usuário clicou
     $mensagem_titulo = $data['data']['message']['listResponseMessage']['title'] ?? '';
 
-    // Pega o número de quem enviou (geralmente vem no campo 'sender' ou 'key.remoteJid')
-    $numero = $data['sender'] ?? $data['data']['key']['remoteJid'] ?? null;
+    // --- LINHA CORRIGIDA ABAIXO ---
+    // Pega o número de quem enviou (o CLIENTE)
+    // 'sender' é o número da sua instância/bot. 'remoteJid' é o número do cliente.
+    $numero = $data['data']['key']['remoteJid'] ?? null;
 
     // Limpa o número para salvar no banco (remove o @s.whatsapp.net)
     if ($numero) {
