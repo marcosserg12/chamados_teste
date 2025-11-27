@@ -273,6 +273,7 @@ if ($dados['st_status'] == 0) {
                             <h4 class="text-sm font-medium text-gray-500 mb-2">Descrição</h4>
                             <p class="text-gray-700" id="detailTicketDescription"><?= $dados['ds_descricao'] ?></p>
                         </div>
+                        <?php if($dados_arquivos[0]["id_chamado"]) { ?>
                         <div class="mb-6">
                             <h4 class="text-sm font-medium text-gray-500 mb-2">Anexos</h4>
 
@@ -313,11 +314,11 @@ if ($dados['st_status'] == 0) {
                                                 </button>
                                                 <a href="' . $caminho . '" download class="text-gray-500 text-xs hover:underline">Baixar</a>
                                             </div>';
-                                    } else if ($extensao === 'pptx') {
+                                    } else if ($extensao === 'pptx' ||$extensao === 'docx' ||$extensao === 'xlsx' ||$extensao === 'xlsm '||$extensao === 'xltx'||$extensao === 'xls'  ) {
                                         echo '
                                             <div class="border p-2 rounded shadow bg-white w-44">
                                                 <div class="text-sm text-gray-600 truncate mb-2">' . $nome . '</div>
-                                                <a href="' . $caminho . '" download class="text-gray-500 text-xs hover:underline">Baixar Power Point</a>
+                                                <a href="' . $caminho . '" download class="text-gray-500 text-xs hover:underline">Baixar Arquivo</a>
                                             </div>';
                                     }
                                 }
@@ -330,6 +331,7 @@ if ($dados['st_status'] == 0) {
                                 <div id="pdf-pages" class="space-y-4 max-h-[600px] overflow-y-auto border rounded p-2"></div>
                             </div>
                         </div>
+                        <?php } ?>
 
 
                         <div>
