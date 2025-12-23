@@ -6,7 +6,7 @@ header('Content-Type: application/json');
 date_default_timezone_set('America/Sao_Paulo');
 
 // Inclua sua conexão
-require_once '../conexao.php'; // AQUI: Ajuste o caminho para voltar uma pasta se necessário, pois a URL tem /api/
+require_once '../Classes/Conecta.php'; // AQUI: Ajuste o caminho para voltar uma pasta se necessário, pois a URL tem /api/
 
 try {
     // 1. Recebe os dados do n8n
