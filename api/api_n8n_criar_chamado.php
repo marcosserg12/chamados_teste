@@ -21,15 +21,19 @@ try {
     $temAnexo = !empty($dados['url_anexo']) && $dados['url_anexo'] !== "";
     $st_anexo = $temAnexo ? 'S' : 'N';
 
+    if($dados['st_grau'] == 777) {
+        $dados['st_grau'] = null;
+    }
+
     // 2. Insert Principal
     $sql = "INSERT INTO tb_chamados (
                 id_usuario, ds_titulo, ds_descricao, dt_data_chamado,
                 id_empresa, id_localizacao, id_tipo_chamado,
-                id_motivo_principal, id_motivo_associado, st_grau, st_status, st_anexo
+                id_motivo_principal, id_motivo_associado, st_grau
             ) VALUES (
                 :id_usuario, :ds_titulo, :ds_descricao, :dt_data_chamado,
                 :id_empresa, :id_localizacao, :id_tipo_chamado,
-                :id_motivo_principal, :id_motivo_associado, :st_grau, 0, :st_anexo
+                :id_motivo_principal, :id_motivo_associado, :st_grau
             )";
 
     $stmt = $connection->prepare($sql);
@@ -43,8 +47,7 @@ try {
         ':id_tipo_chamado' => $dados['id_tipo_chamado'],
         ':id_motivo_principal' => $dados['id_motivo_principal'],
         ':id_motivo_associado' => !empty($dados['id_motivo_associado']) ? $dados['id_motivo_associado'] : null,
-        ':st_grau' => $dados['st_grau'] ?? null,
-        ':st_anexo' => $st_anexo
+        ':st_grau' => $dados['st_grau'] ?? null
     ]);
 
     $id_chamado = $connection->lastInsertId();
