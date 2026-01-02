@@ -2,11 +2,11 @@
 // api_n8n_criar_chamado.php
 header('Content-Type: application/json');
 
-// Define o fuso horário para o Brasil (Brasília)
+// Define o fuso horário
 date_default_timezone_set('America/Sao_Paulo');
 
 // Inclua sua conexão
-require_once '../Classes/Conecta.php'; // AQUI: Ajuste o caminho para voltar uma pasta se necessário, pois a URL tem /api/
+require_once '../Classes/Conecta.php';
 
 try {
     // 1. Recebe os dados do n8n
@@ -20,10 +20,15 @@ try {
     $connection = Conecta::getConexao();
     $connection->beginTransaction();
 
-    // 2. Gera a data atual pelo PHP (formato YYYY-MM-DD HH:MM:SS para o MySQL)
     $dataAtual = date('Y-m-d H:i:s');
 
-    // 3. Query de Inserção
+    // --- NOVA LÓGICA DO ST_ANEXO ---
+    // Verifica se url_anexo existe e não está vazia
+    $temAnexo = !empty($dados['url_anexo']) && $dados['url_anexo'] !== "";
+    $st_anexo = $temAnexo ? 'S' : 'N';
+    // -------------------------------
+
+    // 2. Query de Inserção (Atualizada com st_anexo)
     $sql = "INSERT INTO tb_chamados (
                 id_usuario,
                 ds_titulo,
@@ -35,7 +40,8 @@ try {
                 id_motivo_principal,
                 id_motivo_associado,
                 st_grau,
-                st_status
+                st_status,
+                st_anexo  -- Coluna Nova
             ) VALUES (
                 :id_usuario,
                 :ds_titulo,
@@ -47,7 +53,8 @@ try {
                 :id_motivo_principal,
                 :id_motivo_associado,
                 :st_grau,
-                0
+                0,
+                :st_anexo -- Parâmetro Novo
             )";
 
     $stmt = $connection->prepare($sql);
@@ -55,25 +62,23 @@ try {
         ':id_usuario' => $dados['id_usuario'],
         ':ds_titulo'  => $dados['ds_titulo'],
         ':ds_descricao' => $dados['ds_descricao'],
-        ':dt_data_chamado' => $dataAtual, // Usa a data do PHP
+        ':dt_data_chamado' => $dataAtual,
         ':id_empresa' => $dados['id_empresa'],
         ':id_localizacao' => $dados['id_localizacao'],
         ':id_tipo_chamado' => $dados['id_tipo_chamado'],
         ':id_motivo_principal' => $dados['id_motivo_principal'],
         ':id_motivo_associado' => !empty($dados['id_motivo_associado']) ? $dados['id_motivo_associado'] : null,
-        ':st_grau' => $dados['st_grau'] ?? null
+        ':st_grau' => $dados['st_grau'] ?? null,
+        ':st_anexo' => $st_anexo // Passando o valor S ou N
     ]);
 
     $id_chamado = $connection->lastInsertId();
 
-    // 4. Processamento do Anexo (Salva na pasta uploads/ANO-MES-DIA/ID/)
-    if (!empty($dados['url_anexo']) && filter_var($dados['url_anexo'], FILTER_VALIDATE_URL)) {
+    // 3. Processamento do Arquivo (Só entra aqui se tiver anexo)
+    if ($temAnexo && filter_var($dados['url_anexo'], FILTER_VALIDATE_URL)) {
 
-        // Data para a pasta (apenas Y-m-d)
         $dataPasta = date('Y-m-d');
-
-        // Ajuste o caminho relativo conforme a estrutura do seu servidor
-        // Se este arquivo está em /api/, e uploads está na raiz, use ../uploads
+        // Ajuste o caminho relativo:
         $pastaRelativa = "uploads/{$dataPasta}/{$id_chamado}/";
         $pastaAbsoluta = __DIR__ . "/../" . $pastaRelativa;
 
@@ -81,22 +86,18 @@ try {
             mkdir($pastaAbsoluta, 0755, true);
         }
 
-        // Extrai extensão ou usa jpg como padrão
         $pathInfo = pathinfo(parse_url($dados['url_anexo'], PHP_URL_PATH));
         $extensao = isset($pathInfo['extension']) ? $pathInfo['extension'] : 'jpg';
 
         $nomeArquivo = uniqid("anexo_{$id_chamado}_") . "." . $extensao;
         $caminhoFinal = $pastaAbsoluta . $nomeArquivo;
 
-        // Baixa a imagem
+        // Baixa o arquivo
         $conteudoArquivo = file_get_contents($dados['url_anexo']);
 
         if ($conteudoArquivo !== false) {
             file_put_contents($caminhoFinal, $conteudoArquivo);
 
-            // Salva no banco rl_arquivo_chamado o caminho relativo
-            // Atenção: O caminho salvo deve ser aquele que o seu front-end lê.
-            // Geralmente removemos o "../" para salvar no banco.
             $caminhoParaBanco = $dataPasta . "/" . $id_chamado . "/" . $nomeArquivo;
 
             $stmtArq = $connection->prepare("INSERT INTO rl_arquivo_chamado (id_chamado, ds_caminho_arquivo) VALUES (?, ?)");
@@ -108,12 +109,11 @@ try {
     echo json_encode([
         'status' => 'sucesso',
         'id_chamado' => $id_chamado,
-        'mensagem' => 'Chamado criado em ' . date('d/m/Y H:i:s')
+        'tem_anexo' => $st_anexo,
+        'mensagem' => 'Chamado criado com sucesso.'
     ]);
-
 } catch (Exception $e) {
     if (isset($connection)) $connection->rollBack();
     http_response_code(500);
     echo json_encode(['status' => 'erro', 'mensagem' => $e->getMessage()]);
 }
-?>
