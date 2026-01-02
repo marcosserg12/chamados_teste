@@ -49,8 +49,7 @@ try {
         ':id_tipo_chamado' => $dados['id_tipo_chamado'],
         ':id_motivo_principal' => $dados['id_motivo_principal'],
         ':id_motivo_associado' => !empty($dados['id_motivo_associado']) ? $dados['id_motivo_associado'] : null,
-        ':st_grau' => $dados['st_grau'] ?? null,
-        ':st_anexo' => $st_anexo
+        ':st_grau' => $dados['st_grau'] ?? null
     ]);
 
     $id_chamado = $connection->lastInsertId();
