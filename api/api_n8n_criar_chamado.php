@@ -31,11 +31,11 @@ try {
     $sql = "INSERT INTO tb_chamados (
                 id_usuario, ds_titulo, ds_descricao, dt_data_chamado,
                 id_empresa, id_localizacao, id_tipo_chamado,
-                id_motivo_principal, id_motivo_associado, st_grau, st_status, st_anexo
+                id_motivo_principal, id_motivo_associado, st_grau
             ) VALUES (
                 :id_usuario, :ds_titulo, :ds_descricao, :dt_data_chamado,
                 :id_empresa, :id_localizacao, :id_tipo_chamado,
-                :id_motivo_principal, :id_motivo_associado, :st_grau, 0, :st_anexo
+                :id_motivo_principal, :id_motivo_associado, :st_grau
             )";
 
     $stmt = $connection->prepare($sql);
