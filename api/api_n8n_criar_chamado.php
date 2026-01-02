@@ -49,10 +49,9 @@ try {
 
     $id_chamado = $connection->lastInsertId();
 
-    // 3. Processamento do Anexo (Híbrido: URL ou Base64)
+    // 3. Processamento do Anexo (Versão Inteligente para Documentos e Imagens)
     if ($temAnexo) {
 
-        // Prepara pastas
         $dataPasta = date('Y-m-d');
         $pastaRelativa = "uploads/{$dataPasta}/{$id_chamado}/";
         $pastaAbsoluta = __DIR__ . "/../" . $pastaRelativa;
@@ -63,43 +62,57 @@ try {
 
         $dadoAnexo = $dados['url_anexo'];
         $conteudoArquivo = false;
-        $extensao = 'jpg'; // Padrão
+        $extensao = 'jpg'; // Fallback padrão
 
-        // A. Verifica se é URL (Começa com http)
+        // A. Verifica se é URL (Link http...)
         if (filter_var($dadoAnexo, FILTER_VALIDATE_URL)) {
             $conteudoArquivo = file_get_contents($dadoAnexo);
-
-            // Tenta pegar extensão da URL
             $pathInfo = pathinfo(parse_url($dadoAnexo, PHP_URL_PATH));
             if (isset($pathInfo['extension'])) {
                 $extensao = $pathInfo['extension'];
             }
         }
-        // B. Se não é URL, assume que é Base64
+        // B. Se é BASE64 (Texto gigante)
         else {
-            // Limpa cabeçalho se houver (ex: data:image/png;base64,...)
-            if (preg_match('/^data:image\/(\w+);base64,/', $dadoAnexo, $type)) {
-                $dadoAnexo = substr($dadoAnexo, strpos($dadoAnexo, ',') + 1);
-                $type = strtolower($type[1]); // jpg, png, gif
-                $extensao = $type;
-            } else {
-                // Tenta definir extensão pelo tipo informado pelo n8n
-                if (isset($dados['tipo']) && $dados['tipo'] == 'documento') {
-                    $extensao = 'pdf';
+            // Detecta o Mime-Type no cabeçalho (ex: data:application/pdf;base64,...)
+            if (preg_match('/^data:([\w\/.-]+);base64,/', $dadoAnexo, $matches)) {
+                $mimeType = $matches[1];
+
+                // Mapa de Extensões comuns
+                $mapaExtensoes = [
+                    'application/pdf' => 'pdf',
+                    'application/msword' => 'doc',
+                    'application/vnd.openxmlformats-officedocument.wordprocessingml.document' => 'docx',
+                    'application/vnd.ms-excel' => 'xls',
+                    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' => 'xlsx',
+                    'image/jpeg' => 'jpg',
+                    'image/png'  => 'png',
+                    'image/webp' => 'webp'
+                ];
+
+                if (isset($mapaExtensoes[$mimeType])) {
+                    $extensao = $mapaExtensoes[$mimeType];
                 }
+
+                // Remove o cabeçalho para decodificar apenas o arquivo
+                $dadoAnexo = substr($dadoAnexo, strpos($dadoAnexo, ',') + 1);
             }
-            $dadoAnexo = str_replace(' ', '+', $dadoAnexo);
+            // Se não tiver cabeçalho, confia no tipo enviado pelo n8n
+            else if (isset($dados['tipo']) && $dados['tipo'] == 'documento') {
+                $extensao = 'pdf'; // Chute seguro para documentos sem header
+            }
+
+            $dadoAnexo = str_replace(' ', '+', $dadoAnexo); // Corrige espaços
             $conteudoArquivo = base64_decode($dadoAnexo);
         }
 
-        // C. Salva o Arquivo Fisicamente
+        // C. Salva
         if ($conteudoArquivo !== false) {
             $nomeArquivo = uniqid("anexo_{$id_chamado}_") . "." . $extensao;
             $caminhoFinal = $pastaAbsoluta . $nomeArquivo;
 
             file_put_contents($caminhoFinal, $conteudoArquivo);
 
-            // D. Salva referência no Banco
             $caminhoParaBanco = $dataPasta . "/" . $id_chamado . "/" . $nomeArquivo;
             $stmtArq = $connection->prepare("INSERT INTO rl_arquivo_chamado (id_chamado, ds_caminho_arquivo) VALUES (?, ?)");
             $stmtArq->execute([$id_chamado, $caminhoParaBanco]);
@@ -113,10 +126,8 @@ try {
         'tem_anexo' => $st_anexo,
         'mensagem' => 'Chamado criado.'
     ]);
-
 } catch (Exception $e) {
     if (isset($connection)) $connection->rollBack();
     http_response_code(500);
     echo json_encode(['status' => 'erro', 'mensagem' => $e->getMessage()]);
 }
-?>
