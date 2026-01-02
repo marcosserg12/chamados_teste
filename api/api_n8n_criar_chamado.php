@@ -1,5 +1,7 @@
 <?php
 // api_n8n_criar_chamado.php
+ini_set('memory_limit', '256M');
+ini_set('post_max_size', '20M');
 header('Content-Type: application/json');
 date_default_timezone_set('America/Sao_Paulo');
 
@@ -21,7 +23,7 @@ try {
     $temAnexo = !empty($dados['url_anexo']) && $dados['url_anexo'] !== "";
     $st_anexo = $temAnexo ? 'S' : 'N';
 
-    if($dados['st_grau'] == 777) {
+    if(isset($dados['st_grau']) && $dados['st_grau'] == 777) {
         $dados['st_grau'] = null;
     }
 
@@ -29,11 +31,11 @@ try {
     $sql = "INSERT INTO tb_chamados (
                 id_usuario, ds_titulo, ds_descricao, dt_data_chamado,
                 id_empresa, id_localizacao, id_tipo_chamado,
-                id_motivo_principal, id_motivo_associado, st_grau
+                id_motivo_principal, id_motivo_associado, st_grau, st_status, st_anexo
             ) VALUES (
                 :id_usuario, :ds_titulo, :ds_descricao, :dt_data_chamado,
                 :id_empresa, :id_localizacao, :id_tipo_chamado,
-                :id_motivo_principal, :id_motivo_associado, :st_grau
+                :id_motivo_principal, :id_motivo_associado, :st_grau, 0, :st_anexo
             )";
 
     $stmt = $connection->prepare($sql);
@@ -47,78 +49,90 @@ try {
         ':id_tipo_chamado' => $dados['id_tipo_chamado'],
         ':id_motivo_principal' => $dados['id_motivo_principal'],
         ':id_motivo_associado' => !empty($dados['id_motivo_associado']) ? $dados['id_motivo_associado'] : null,
-        ':st_grau' => $dados['st_grau'] ?? null
+        ':st_grau' => $dados['st_grau'] ?? null,
+        ':st_anexo' => $st_anexo
     ]);
 
     $id_chamado = $connection->lastInsertId();
 
-    // 3. Processamento do Anexo (Versão Inteligente para Documentos e Imagens)
+    // 3. Processamento do Anexo (CORRIGIDO PARA BASE64 PURO)
     if ($temAnexo) {
 
         $dataPasta = date('Y-m-d');
+        // Caminho Absoluto Seguro
         $pastaRelativa = "uploads/{$dataPasta}/{$id_chamado}/";
         $pastaAbsoluta = __DIR__ . "/../" . $pastaRelativa;
 
+        // Cria a pasta se não existir
         if (!is_dir($pastaAbsoluta)) {
-            mkdir($pastaAbsoluta, 0755, true);
+            // 0777 garante permissão de escrita
+            mkdir($pastaAbsoluta, 0777, true);
         }
 
         $dadoAnexo = $dados['url_anexo'];
-        $conteudoArquivo = false;
-        $extensao = 'jpg'; // Fallback padrão
+        $conteudoArquivo = null;
 
-        // A. Verifica se é URL (Link http...)
+        // --- ETAPA A: Decodificação ---
+
+        // Verifica se é URL (http...)
         if (filter_var($dadoAnexo, FILTER_VALIDATE_URL)) {
             $conteudoArquivo = file_get_contents($dadoAnexo);
-            $pathInfo = pathinfo(parse_url($dadoAnexo, PHP_URL_PATH));
-            if (isset($pathInfo['extension'])) {
-                $extensao = $pathInfo['extension'];
-            }
         }
-        // B. Se é BASE64 (Texto gigante)
+        // Se não for URL, assumimos Base64
         else {
-            // Detecta o Mime-Type no cabeçalho (ex: data:application/pdf;base64,...)
-            if (preg_match('/^data:([\w\/.-]+);base64,/', $dadoAnexo, $matches)) {
-                $mimeType = $matches[1];
-
-                // Mapa de Extensões comuns
-                $mapaExtensoes = [
-                    'application/pdf' => 'pdf',
-                    'application/msword' => 'doc',
-                    'application/vnd.openxmlformats-officedocument.wordprocessingml.document' => 'docx',
-                    'application/vnd.ms-excel' => 'xls',
-                    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' => 'xlsx',
-                    'image/jpeg' => 'jpg',
-                    'image/png'  => 'png',
-                    'image/webp' => 'webp'
-                ];
-
-                if (isset($mapaExtensoes[$mimeType])) {
-                    $extensao = $mapaExtensoes[$mimeType];
-                }
-
-                // Remove o cabeçalho para decodificar apenas o arquivo
-                $dadoAnexo = substr($dadoAnexo, strpos($dadoAnexo, ',') + 1);
-            }
-            // Se não tiver cabeçalho, confia no tipo enviado pelo n8n
-            else if (isset($dados['tipo']) && $dados['tipo'] == 'documento') {
-                $extensao = 'pdf'; // Chute seguro para documentos sem header
+            // Se vier com prefixo "data:image/...", removemos
+            if (strpos($dadoAnexo, 'base64,') !== false) {
+                $dadoAnexo = explode('base64,', $dadoAnexo)[1];
             }
 
-            $dadoAnexo = str_replace(' ', '+', $dadoAnexo); // Corrige espaços
+            // Remove espaços e quebras de linha que podem corromper
+            $dadoAnexo = str_replace([' ', "\n", "\r"], ['+', '', ''], $dadoAnexo);
+
+            // Transforma o TEXTO em ARQUIVO BINÁRIO REAL
             $conteudoArquivo = base64_decode($dadoAnexo);
         }
 
-        // C. Salva
-        if ($conteudoArquivo !== false) {
+        // --- ETAPA B: Descobrir a Extensão Real (Magia do finfo) ---
+        if ($conteudoArquivo) {
+
+            // Usa o PHP para ler os bits do arquivo e dizer o que é
+            $finfo = new finfo(FILEINFO_MIME_TYPE);
+            $mimeType = $finfo->buffer($conteudoArquivo);
+
+            // Mapa de Mimes para Extensões
+            $extensoes = [
+                'image/jpeg' => 'jpg',
+                'image/png' => 'png',
+                'image/webp' => 'webp',
+                'application/pdf' => 'pdf',
+                'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' => 'xlsx', // Excel novo
+                'application/vnd.ms-excel' => 'xls', // Excel velho
+                'application/vnd.openxmlformats-officedocument.wordprocessingml.document' => 'docx', // Word
+                'application/msword' => 'doc',
+                'application/zip' => 'zip',
+                'text/plain' => 'txt'
+            ];
+
+            // Define extensão (Padrão jpg se não achar)
+            $extensao = isset($extensoes[$mimeType]) ? $extensoes[$mimeType] : 'jpg';
+
+            // Se for application/zip mas estamos esperando Excel, força xlsx
+            if ($mimeType == 'application/zip' && strpos($dadoAnexo, 'UEsDB') === 0) {
+                $extensao = 'xlsx';
+            }
+
+            // Gera nome e salva
             $nomeArquivo = uniqid("anexo_{$id_chamado}_") . "." . $extensao;
             $caminhoFinal = $pastaAbsoluta . $nomeArquivo;
 
-            file_put_contents($caminhoFinal, $conteudoArquivo);
+            // Salva o binário no disco
+            $salvou = file_put_contents($caminhoFinal, $conteudoArquivo);
 
-            $caminhoParaBanco = $dataPasta . "/" . $id_chamado . "/" . $nomeArquivo;
-            $stmtArq = $connection->prepare("INSERT INTO rl_arquivo_chamado (id_chamado, ds_caminho_arquivo) VALUES (?, ?)");
-            $stmtArq->execute([$id_chamado, $caminhoParaBanco]);
+            if ($salvou !== false) {
+                $caminhoParaBanco = $dataPasta . "/" . $id_chamado . "/" . $nomeArquivo;
+                $stmtArq = $connection->prepare("INSERT INTO rl_arquivo_chamado (id_chamado, ds_caminho_arquivo) VALUES (?, ?)");
+                $stmtArq->execute([$id_chamado, $caminhoParaBanco]);
+            }
         }
     }
 
@@ -134,3 +148,4 @@ try {
     http_response_code(500);
     echo json_encode(['status' => 'erro', 'mensagem' => $e->getMessage()]);
 }
+?>
