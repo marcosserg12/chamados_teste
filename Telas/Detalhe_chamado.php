@@ -41,13 +41,14 @@ if (isset($_GET['id_chamado']) && isset($_GET['token']) && isset($_GET['id_usuar
         $_SESSION['ultimo_acesso'] = time(); // Importante para não dar expirado
     }
 }
+var_dump($token_recebido);
 // =========================================================================
 
 
 // 2. AGORA SIM, CARREGA O SISTEMA
 // Quando o scripts.php rodar, ele vai olhar a sessão, ver que já existe o $_SESSION['user']
 // que criamos acima, e vai deixar passar sem redirecionar.
-include '../scripts.php';
+// include '../scripts.php';
 require '../vendor/autoload.php';
 
 ini_set('display_errors', 1);
