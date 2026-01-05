@@ -6,34 +6,41 @@ error_reporting(E_ALL);
 require  '../vendor/autoload.php';
 
 
-$segredo_sistema = 'S!st3m@D3Ch@mados#2026$Ibr@Nutr0%Sup3rS3cr3tK3y&Vasco';
+// 1. Recebe os dados da URL
+if (isset($_GET['id_chamado']) && isset($_GET['token']) && isset($_GET['id_usuario'])) {
 
+    $id_chamado = $_GET['id_chamado'];
+    $id_usuario = $_GET['id_usuario'];
 
-if (isset($_GET['id_chamado']) && isset($_GET['token'])) {
+    // CORREÇÃO 1: Tratar o nome que vem da URL (decodificar espaços)
+    $ds_nome = isset($_GET['ds_nome']) ? urldecode($_GET['ds_nome']) : 'Usuario WhatsApp';
 
-    $id_recebido = $_GET['id_chamado'];
     $token_recebido = $_GET['token'];
 
-    $token_valido = hash_hmac('sha256', $id_recebido, $segredo_sistema);
+    // 2. Valida a assinatura (Concatena ID Chamado + ID Usuário)
+    $dados_para_validar = (string)$id_chamado . (string)$id_usuario;
+    $token_valido = hash_hmac('sha256', $dados_para_validar, $segredo_sistema);
 
     if (hash_equals($token_valido, $token_recebido)) {
 
+        // --- SUCESSO ---
 
+        $usuario_fake = [
+            'id_usuario' => $id_usuario,
+            'ds_usuario' => $ds_nome,      // Usar o nome recebido
+            'ds_nome'    => $ds_nome,      // CORREÇÃO 2: Usar a variável certa aqui
+            'ds_email'   => 'suporte@ibranutro.com.br',
+            'ds_senha'   => '***',
+            'id_perfil'  => 1,
+            'ds_perfil'  => 'Acesso Remoto',
+            'st_ativo'   => 'A',
+            'st_reset_senha' => 'N'
+        ];
 
-        $_SESSION['autenticado'] = true;
-        $_SESSION['usuario_id'] = 0; // ID 0 ou um ID de "Visitante"
-        $_SESSION['usuario_nome'] = "Acesso via WhatsApp";
-
-
+        $_SESSION['user'] = $usuario_fake;
+        $_SESSION['ultimo_acesso'] = time();
     }
 }
-
-
-if (!Security::isAuthenticated()) {
-    redirect('../index.php');
-}
-
-// ... Restante do código da página ...
 $id_usuario = Security::getUser()['id_usuario'];
 $id_perfil = Security::getUser()['id_perfil'];
 $id_chamado = $_REQUEST['id_chamado'];
@@ -299,40 +306,40 @@ if ($dados['st_status'] == 0) {
                             <h4 class="text-sm font-medium text-gray-500 mb-2">Descrição</h4>
                             <p class="text-gray-700" id="detailTicketDescription"><?= $dados['ds_descricao'] ?></p>
                         </div>
-                        <?php if($dados_arquivos[0]["id_chamado"]) { ?>
-                        <div class="mb-6">
-                            <h4 class="text-sm font-medium text-gray-500 mb-2">Anexos</h4>
+                        <?php if ($dados_arquivos[0]["id_chamado"]) { ?>
+                            <div class="mb-6">
+                                <h4 class="text-sm font-medium text-gray-500 mb-2">Anexos</h4>
 
-                            <!-- Imagens -->
-                            <div id="lightgallery" class="grid grid-cols-5 sm:grid-cols-5 md:grid-cols-5 gap-4 mb-6">
-                                <?php
-                                $dados_arquivos = $chamados->mostrararquivosChamado($_REQUEST['id_chamado']);
-                                foreach ($dados_arquivos as $arquivo) {
-                                    $extensao = strtolower(pathinfo($arquivo['ds_caminho_arquivo'], PATHINFO_EXTENSION));
-                                    $nome = basename($arquivo['ds_caminho_arquivo']);
-                                    $caminho = '/uploads/' . $arquivo['ds_caminho_arquivo']; // URL pública
+                                <!-- Imagens -->
+                                <div id="lightgallery" class="grid grid-cols-5 sm:grid-cols-5 md:grid-cols-5 gap-4 mb-6">
+                                    <?php
+                                    $dados_arquivos = $chamados->mostrararquivosChamado($_REQUEST['id_chamado']);
+                                    foreach ($dados_arquivos as $arquivo) {
+                                        $extensao = strtolower(pathinfo($arquivo['ds_caminho_arquivo'], PATHINFO_EXTENSION));
+                                        $nome = basename($arquivo['ds_caminho_arquivo']);
+                                        $caminho = '/uploads/' . $arquivo['ds_caminho_arquivo']; // URL pública
 
-                                    if (in_array($extensao, ['jpg', 'jpeg', 'png', 'gif'])) {
-                                        // Imagem - usa LightGallery
-                                        echo '
+                                        if (in_array($extensao, ['jpg', 'jpeg', 'png', 'gif'])) {
+                                            // Imagem - usa LightGallery
+                                            echo '
                                         <a href="' . $caminho . '" data-lg-size="1600-1067" class="block border p-2 rounded shadow bg-white w-28">
                                         <img src="' . $caminho . '" class="h-16 w-full object-cover rounded" />
                                             </a>';
+                                        }
                                     }
-                                }
-                                ?>
-                            </div>
+                                    ?>
+                                </div>
 
-                            <!-- PDFs -->
-                            <div class="grid grid-cols-1 sm:grid-cols-5 md:grid-cols-5 gap-4">
-                                <?php
-                                foreach ($dados_arquivos as $arquivo) {
-                                    $extensao = strtolower(pathinfo($arquivo['ds_caminho_arquivo'], PATHINFO_EXTENSION));
-                                    $nome = basename($arquivo['ds_caminho_arquivo']);
-                                    $caminho = '/uploads/' . $arquivo['ds_caminho_arquivo']; // URL pública
+                                <!-- PDFs -->
+                                <div class="grid grid-cols-1 sm:grid-cols-5 md:grid-cols-5 gap-4">
+                                    <?php
+                                    foreach ($dados_arquivos as $arquivo) {
+                                        $extensao = strtolower(pathinfo($arquivo['ds_caminho_arquivo'], PATHINFO_EXTENSION));
+                                        $nome = basename($arquivo['ds_caminho_arquivo']);
+                                        $caminho = '/uploads/' . $arquivo['ds_caminho_arquivo']; // URL pública
 
-                                    if ($extensao === 'pdf') {
-                                        echo '
+                                        if ($extensao === 'pdf') {
+                                            echo '
                                             <div class="border p-2 rounded shadow bg-white w-44">
                                                 <div class="text-sm text-gray-600 truncate mb-2">' . $nome . '</div>
                                                 <button onclick="previewPDF(\'' . $caminho . '\')" class="text-blue-600 text-sm hover:underline mb-1">
@@ -340,23 +347,23 @@ if ($dados['st_status'] == 0) {
                                                 </button>
                                                 <a href="' . $caminho . '" download class="text-gray-500 text-xs hover:underline">Baixar</a>
                                             </div>';
-                                    } else if ($extensao === 'pptx' ||$extensao === 'docx' ||$extensao === 'xlsx' ||$extensao === 'xlsm '||$extensao === 'xltx'||$extensao === 'xls'  ) {
-                                        echo '
+                                        } else if ($extensao === 'pptx' || $extensao === 'docx' || $extensao === 'xlsx' || $extensao === 'xlsm ' || $extensao === 'xltx' || $extensao === 'xls') {
+                                            echo '
                                             <div class="border p-2 rounded shadow bg-white w-44">
                                                 <div class="text-sm text-gray-600 truncate mb-2">' . $nome . '</div>
                                                 <a href="' . $caminho . '" download class="text-gray-500 text-xs hover:underline">Baixar Arquivo</a>
                                             </div>';
+                                        }
                                     }
-                                }
-                                ?>
-                            </div>
+                                    ?>
+                                </div>
 
-                            <!-- Preview PDF -->
-                            <div id="pdf-preview" class="mt-6 border rounded p-4 hidden bg-white">
-                                <h5 class="text-sm font-semibold mb-2">Pré-visualização do PDF</h5>
-                                <div id="pdf-pages" class="space-y-4 max-h-[600px] overflow-y-auto border rounded p-2"></div>
+                                <!-- Preview PDF -->
+                                <div id="pdf-preview" class="mt-6 border rounded p-4 hidden bg-white">
+                                    <h5 class="text-sm font-semibold mb-2">Pré-visualização do PDF</h5>
+                                    <div id="pdf-pages" class="space-y-4 max-h-[600px] overflow-y-auto border rounded p-2"></div>
+                                </div>
                             </div>
-                        </div>
                         <?php } ?>
 
 
