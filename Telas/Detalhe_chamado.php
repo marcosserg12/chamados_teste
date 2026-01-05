@@ -7,30 +7,7 @@ require  '../vendor/autoload.php';
 
 
 $segredo_sistema = 'S!st3m@D3Ch@mados#2026$Ibr@Nutr0%Sup3rS3cr3tK3y&Vasco';
-// ... seus includes ...
-$segredo_sistema = 'a3f9e2d1c8b7a6059483726150493827160594837261504938271605948372b1'; // A MESMA DO N8N
 
-if (isset($_GET['id_chamado']) && isset($_GET['token'])) {
-    $id = $_GET['id_chamado'];
-    $token_recebido = $_GET['token'];
-    $token_calculado = hash_hmac('sha256', (string)$id, $segredo_sistema);
-
-    echo "<h1>Debug do Link Mágico</h1>";
-    echo "ID recebido: " . $id . "<br>";
-    echo "Token Recebido (URL): " . $token_recebido . "<br>";
-    echo "Token Calculado (PHP): " . $token_calculado . "<br>";
-
-    if (hash_equals($token_calculado, $token_recebido)) {
-        echo "<h2 style='color:green'>SUCESSO: Os tokens batem!</h2>";
-        echo "O problema é que as variáveis de sessão não estão satisfazendo o Security::isAuthenticated().";
-        die(); // Para o script aqui para você ler
-    } else {
-        echo "<h2 style='color:red'>ERRO: Os tokens são diferentes.</h2>";
-        echo "Verifique se a senha secreta é EXATAMENTE igual no n8n e aqui.";
-        die();
-    }
-}
-// ... resto do código ...
 
 if (isset($_GET['id_chamado']) && isset($_GET['token'])) {
 
@@ -46,6 +23,8 @@ if (isset($_GET['id_chamado']) && isset($_GET['token'])) {
         $_SESSION['autenticado'] = true;
         $_SESSION['usuario_id'] = 0; // ID 0 ou um ID de "Visitante"
         $_SESSION['usuario_nome'] = "Acesso via WhatsApp";
+
+
     }
 }
 
@@ -320,40 +299,40 @@ if ($dados['st_status'] == 0) {
                             <h4 class="text-sm font-medium text-gray-500 mb-2">Descrição</h4>
                             <p class="text-gray-700" id="detailTicketDescription"><?= $dados['ds_descricao'] ?></p>
                         </div>
-                        <?php if ($dados_arquivos[0]["id_chamado"]) { ?>
-                            <div class="mb-6">
-                                <h4 class="text-sm font-medium text-gray-500 mb-2">Anexos</h4>
+                        <?php if($dados_arquivos[0]["id_chamado"]) { ?>
+                        <div class="mb-6">
+                            <h4 class="text-sm font-medium text-gray-500 mb-2">Anexos</h4>
 
-                                <!-- Imagens -->
-                                <div id="lightgallery" class="grid grid-cols-5 sm:grid-cols-5 md:grid-cols-5 gap-4 mb-6">
-                                    <?php
-                                    $dados_arquivos = $chamados->mostrararquivosChamado($_REQUEST['id_chamado']);
-                                    foreach ($dados_arquivos as $arquivo) {
-                                        $extensao = strtolower(pathinfo($arquivo['ds_caminho_arquivo'], PATHINFO_EXTENSION));
-                                        $nome = basename($arquivo['ds_caminho_arquivo']);
-                                        $caminho = '/uploads/' . $arquivo['ds_caminho_arquivo']; // URL pública
+                            <!-- Imagens -->
+                            <div id="lightgallery" class="grid grid-cols-5 sm:grid-cols-5 md:grid-cols-5 gap-4 mb-6">
+                                <?php
+                                $dados_arquivos = $chamados->mostrararquivosChamado($_REQUEST['id_chamado']);
+                                foreach ($dados_arquivos as $arquivo) {
+                                    $extensao = strtolower(pathinfo($arquivo['ds_caminho_arquivo'], PATHINFO_EXTENSION));
+                                    $nome = basename($arquivo['ds_caminho_arquivo']);
+                                    $caminho = '/uploads/' . $arquivo['ds_caminho_arquivo']; // URL pública
 
-                                        if (in_array($extensao, ['jpg', 'jpeg', 'png', 'gif'])) {
-                                            // Imagem - usa LightGallery
-                                            echo '
+                                    if (in_array($extensao, ['jpg', 'jpeg', 'png', 'gif'])) {
+                                        // Imagem - usa LightGallery
+                                        echo '
                                         <a href="' . $caminho . '" data-lg-size="1600-1067" class="block border p-2 rounded shadow bg-white w-28">
                                         <img src="' . $caminho . '" class="h-16 w-full object-cover rounded" />
                                             </a>';
-                                        }
                                     }
-                                    ?>
-                                </div>
+                                }
+                                ?>
+                            </div>
 
-                                <!-- PDFs -->
-                                <div class="grid grid-cols-1 sm:grid-cols-5 md:grid-cols-5 gap-4">
-                                    <?php
-                                    foreach ($dados_arquivos as $arquivo) {
-                                        $extensao = strtolower(pathinfo($arquivo['ds_caminho_arquivo'], PATHINFO_EXTENSION));
-                                        $nome = basename($arquivo['ds_caminho_arquivo']);
-                                        $caminho = '/uploads/' . $arquivo['ds_caminho_arquivo']; // URL pública
+                            <!-- PDFs -->
+                            <div class="grid grid-cols-1 sm:grid-cols-5 md:grid-cols-5 gap-4">
+                                <?php
+                                foreach ($dados_arquivos as $arquivo) {
+                                    $extensao = strtolower(pathinfo($arquivo['ds_caminho_arquivo'], PATHINFO_EXTENSION));
+                                    $nome = basename($arquivo['ds_caminho_arquivo']);
+                                    $caminho = '/uploads/' . $arquivo['ds_caminho_arquivo']; // URL pública
 
-                                        if ($extensao === 'pdf') {
-                                            echo '
+                                    if ($extensao === 'pdf') {
+                                        echo '
                                             <div class="border p-2 rounded shadow bg-white w-44">
                                                 <div class="text-sm text-gray-600 truncate mb-2">' . $nome . '</div>
                                                 <button onclick="previewPDF(\'' . $caminho . '\')" class="text-blue-600 text-sm hover:underline mb-1">
@@ -361,23 +340,23 @@ if ($dados['st_status'] == 0) {
                                                 </button>
                                                 <a href="' . $caminho . '" download class="text-gray-500 text-xs hover:underline">Baixar</a>
                                             </div>';
-                                        } else if ($extensao === 'pptx' || $extensao === 'docx' || $extensao === 'xlsx' || $extensao === 'xlsm ' || $extensao === 'xltx' || $extensao === 'xls') {
-                                            echo '
+                                    } else if ($extensao === 'pptx' ||$extensao === 'docx' ||$extensao === 'xlsx' ||$extensao === 'xlsm '||$extensao === 'xltx'||$extensao === 'xls'  ) {
+                                        echo '
                                             <div class="border p-2 rounded shadow bg-white w-44">
                                                 <div class="text-sm text-gray-600 truncate mb-2">' . $nome . '</div>
                                                 <a href="' . $caminho . '" download class="text-gray-500 text-xs hover:underline">Baixar Arquivo</a>
                                             </div>';
-                                        }
                                     }
-                                    ?>
-                                </div>
-
-                                <!-- Preview PDF -->
-                                <div id="pdf-preview" class="mt-6 border rounded p-4 hidden bg-white">
-                                    <h5 class="text-sm font-semibold mb-2">Pré-visualização do PDF</h5>
-                                    <div id="pdf-pages" class="space-y-4 max-h-[600px] overflow-y-auto border rounded p-2"></div>
-                                </div>
+                                }
+                                ?>
                             </div>
+
+                            <!-- Preview PDF -->
+                            <div id="pdf-preview" class="mt-6 border rounded p-4 hidden bg-white">
+                                <h5 class="text-sm font-semibold mb-2">Pré-visualização do PDF</h5>
+                                <div id="pdf-pages" class="space-y-4 max-h-[600px] overflow-y-auto border rounded p-2"></div>
+                            </div>
+                        </div>
                         <?php } ?>
 
 
