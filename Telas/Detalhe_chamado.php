@@ -5,9 +5,34 @@ ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 require  '../vendor/autoload.php';
 
+
+$segredo_sistema = 'S!st3m@D3Ch@mados#2026$Ibr@Nutr0%Sup3rS3cr3tK3y&Vasco';
+
+if (isset($_GET['id_chamado']) && isset($_GET['token'])) {
+
+    $id_recebido = $_GET['id_chamado'];
+    $token_recebido = $_GET['token'];
+
+    $token_valido = hash_hmac('sha256', $id_recebido, $segredo_sistema);
+
+    if (hash_equals($token_valido, $token_recebido)) {
+
+
+
+        $_SESSION['autenticado'] = true;
+        $_SESSION['usuario_id'] = 0; // ID 0 ou um ID de "Visitante"
+        $_SESSION['usuario_nome'] = "Acesso via WhatsApp";
+
+
+    }
+}
+
+
 if (!Security::isAuthenticated()) {
     redirect('../index.php');
 }
+
+// ... Restante do código da página ...
 $id_usuario = Security::getUser()['id_usuario'];
 $id_perfil = Security::getUser()['id_perfil'];
 $id_chamado = $_REQUEST['id_chamado'];
