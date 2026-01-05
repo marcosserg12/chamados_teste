@@ -1,60 +1,117 @@
 <?php
-// 1. INICIA A SESSÃO MANUALMENTE
-// Fazemos isso para poder escrever na sessão ANTES do sistema carregar
+// ATIVAR ERROS PARA O DEBUGGER
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
+
+// 1. INICIA A SESSÃO
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
 // =========================================================================
-// LOGIN MÁGICO (O Código deve ficar AQUI, no topo absoluto)
+// CONFIGURAÇÕES DO DEBUGGER
 // =========================================================================
-
 $segredo_sistema = 'a3f9e2d1c8b7a6059483726150493827160594837261504938271605948372b1';
 
-if (isset($_GET['id_chamado']) && isset($_GET['token']) && isset($_GET['id_usuario'])) {
+// Captura variáveis de forma segura (evita erro de undefined index)
+$id_chamado     = $_GET['id_chamado'] ?? 'NÃO INFORMADO';
+$id_usuario     = $_GET['id_usuario'] ?? 'NÃO INFORMADO';
+$token_recebido = $_GET['token'] ?? 'NÃO INFORMADO';
+$ds_nome        = isset($_GET['ds_nome']) ? urldecode($_GET['ds_nome']) : 'Usuario WhatsApp';
 
-    $id_chamado = $_GET['id_chamado'];
-    $id_usuario = $_GET['id_usuario'];
-    $ds_nome = isset($_GET['ds_nome']) ? urldecode($_GET['ds_nome']) : 'Usuario WhatsApp';
-    $token_recebido = $_GET['token'];
+// CSS para o Debugger ficar bonito
+echo "<style>
+    body { font-family: sans-serif; background: #f4f4f4; padding: 20px; }
+    .box { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); max-width: 800px; margin: 0 auto; }
+    .row { border-bottom: 1px solid #eee; padding: 10px 0; }
+    .label { font-weight: bold; color: #555; }
+    .code { background: #333; color: #0f0; padding: 4px 8px; border-radius: 4px; font-family: monospace; word-break: break-all; }
+    .success { color: green; font-weight: bold; font-size: 1.2em; }
+    .error { color: red; font-weight: bold; font-size: 1.2em; }
+    h2 { margin-top: 0; }
+</style>";
 
-    // Valida Token
-    $dados_para_validar = (string)$id_chamado . (string)$id_usuario;
-    $token_valido = hash_hmac('sha256', $dados_para_validar, $segredo_sistema);
+echo "<div class='box'>";
+echo "<h2>🕵️ Debugger do Link Mágico</h2>";
 
-    if (hash_equals($token_valido, $token_recebido)) {
+// -------------------------------------------------------------------------
+// PASSO 1: VERIFICAR DADOS DE ENTRADA
+// -------------------------------------------------------------------------
+echo "<h3>1. Dados Recebidos da URL</h3>";
+echo "<div class='row'><span class='label'>ID Chamado:</span> $id_chamado</div>";
+echo "<div class='row'><span class='label'>ID Usuário:</span> $id_usuario</div>";
+echo "<div class='row'><span class='label'>Token Recebido:</span> <br><span class='code'>$token_recebido</span></div>";
 
-        // MONTA A SESSÃO
-        $usuario_fake = [
-            'id_usuario' => $id_usuario,
-            'ds_usuario' => $ds_nome,
-            'ds_nome'    => $ds_nome,
-            'ds_email'   => 'suporte@ibranutro.com.br',
-            'ds_senha'   => '***',
-            'id_perfil'  => 2,
-            'ds_perfil'  => 'Acesso Remoto',
-            'st_ativo'   => 'A',
-            'st_reset_senha' => 'N'
-        ];
-
-        $_SESSION['user'] = $usuario_fake;
-        $_SESSION['ultimo_acesso'] = time(); // Importante para não dar expirado
-    }
+// Verificação básica de existência
+if ($id_chamado === 'NÃO INFORMADO' || $id_usuario === 'NÃO INFORMADO' || $token_recebido === 'NÃO INFORMADO') {
+    echo "<br><div class='error'>❌ ERRO FATAL: Faltam parâmetros na URL.</div>";
+    die("</div>");
 }
-var_dump($token_recebido);
+
+// -------------------------------------------------------------------------
+// PASSO 2: CÁLCULO DO HASH
+// -------------------------------------------------------------------------
+echo "<h3>2. Validando a Criptografia</h3>";
+
+// Concatenação
+$dados_para_validar = (string)$id_chamado . (string)$id_usuario;
+echo "<div class='row'><span class='label'>String Concatenada (PHP):</span> <br><span class='code'>$dados_para_validar</span><br><small>(Isso deve ser igual a: id_chamado + id_usuario sem espaços)</small></div>";
+
+// Cálculo
+$token_calculado = hash_hmac('sha256', $dados_para_validar, $segredo_sistema);
+echo "<div class='row'><span class='label'>Token Calculado pelo Servidor:</span> <br><span class='code'>$token_calculado</span></div>";
+
+// Comparação
+echo "<h3>3. Resultado da Comparação</h3>";
+
+if (hash_equals($token_calculado, $token_recebido)) {
+    echo "<div class='success'>✅ SUCESSO! O Token é Válido.</div>";
+
+    // ---------------------------------------------------------------------
+    // PASSO 3: CRIAÇÃO DA SESSÃO (Só executa se deu certo)
+    // ---------------------------------------------------------------------
+    echo "<h3>4. Teste de Criação de Sessão</h3>";
+
+    $usuario_fake = [
+        'id_usuario' => $id_usuario,
+        'ds_usuario' => $ds_nome,
+        'ds_nome'    => $ds_nome,
+        'ds_email'   => 'suporte@ibranutro.com.br',
+        'ds_senha'   => '***',
+        'id_perfil'  => 2,
+        'ds_perfil'  => 'Acesso Remoto',
+        'st_ativo'   => 'A',
+        'st_reset_senha' => 'N'
+    ];
+
+    $_SESSION['user'] = $usuario_fake;
+    $_SESSION['ultimo_acesso'] = time();
+
+    echo "<div class='row'><span class='label'>Conteúdo da \$_SESSION['user']:</span><pre>" . print_r($_SESSION['user'], true) . "</pre></div>";
+    echo "<div class='row'><span class='label'>Session ID:</span> " . session_id() . "</div>";
+
+    echo "<br><b>PRÓXIMO PASSO:</b> Se você estivesse no modo real, o sistema carregaria agora.";
+} else {
+    echo "<div class='error'>❌ ERRO: Tokens Diferentes!</div>";
+    echo "<p>Possíveis causas:</p>";
+    echo "<ul>
+        <li>A senha secreta no PHP é diferente do n8n?</li>
+        <li>O n8n somou os números (ex: 314+27 = 341) em vez de juntar texto (31427)?</li>
+        <li>O ID do usuário na URL está correto?</li>
+    </ul>";
+}
+
+echo "</div>"; // Fecha box
+
+// BLOQUEIA O RESTO DO SISTEMA PARA VOCÊ LER O DEBUG
+die();
+
 // =========================================================================
-
-
-// 2. AGORA SIM, CARREGA O SISTEMA
-// Quando o scripts.php rodar, ele vai olhar a sessão, ver que já existe o $_SESSION['user']
-// que criamos acima, e vai deixar passar sem redirecionar.
-// include '../scripts.php';
+// CÓDIGO ORIGINAL (IGNORADO PELO DIE ACIMA)
+// =========================================================================
 require '../vendor/autoload.php';
-
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
-error_reporting(E_ALL);
-
+// ...
 // ... Resto do seu código ...
 
 
