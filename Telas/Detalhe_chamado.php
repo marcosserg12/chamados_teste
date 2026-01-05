@@ -1,9 +1,4 @@
 <?php
-include   '../scripts.php';
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
-error_reporting(E_ALL);
-require  '../vendor/autoload.php';
 
 
 // 1. Recebe os dados da URL
@@ -41,6 +36,13 @@ if (isset($_GET['id_chamado']) && isset($_GET['token']) && isset($_GET['id_usuar
         $_SESSION['ultimo_acesso'] = time();
     }
 }
+include   '../scripts.php';
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
+require  '../vendor/autoload.php';
+
+
 $id_usuario = Security::getUser()['id_usuario'];
 $id_perfil = Security::getUser()['id_perfil'];
 $id_chamado = $_REQUEST['id_chamado'];
