@@ -1,46 +1,60 @@
 <?php
+// 1. INICIA A SESSÃO MANUALMENTE
+// Fazemos isso para poder escrever na sessão ANTES do sistema carregar
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 
+// =========================================================================
+// LOGIN MÁGICO (O Código deve ficar AQUI, no topo absoluto)
+// =========================================================================
 
-// 1. Recebe os dados da URL
+$segredo_sistema = 'a3f9e2d1c8b7a6059483726150493827160594837261504938271605948372b1';
+
 if (isset($_GET['id_chamado']) && isset($_GET['token']) && isset($_GET['id_usuario'])) {
 
     $id_chamado = $_GET['id_chamado'];
     $id_usuario = $_GET['id_usuario'];
-
-    // CORREÇÃO 1: Tratar o nome que vem da URL (decodificar espaços)
     $ds_nome = isset($_GET['ds_nome']) ? urldecode($_GET['ds_nome']) : 'Usuario WhatsApp';
-
     $token_recebido = $_GET['token'];
 
-    // 2. Valida a assinatura (Concatena ID Chamado + ID Usuário)
+    // Valida Token
     $dados_para_validar = (string)$id_chamado . (string)$id_usuario;
     $token_valido = hash_hmac('sha256', $dados_para_validar, $segredo_sistema);
 
     if (hash_equals($token_valido, $token_recebido)) {
 
-        // --- SUCESSO ---
-
+        // MONTA A SESSÃO
         $usuario_fake = [
             'id_usuario' => $id_usuario,
-            'ds_usuario' => $ds_nome,      // Usar o nome recebido
-            'ds_nome'    => $ds_nome,      // CORREÇÃO 2: Usar a variável certa aqui
+            'ds_usuario' => $ds_nome,
+            'ds_nome'    => $ds_nome,
             'ds_email'   => 'suporte@ibranutro.com.br',
             'ds_senha'   => '***',
-            'id_perfil'  => 1,
+            'id_perfil'  => 2,
             'ds_perfil'  => 'Acesso Remoto',
             'st_ativo'   => 'A',
             'st_reset_senha' => 'N'
         ];
 
         $_SESSION['user'] = $usuario_fake;
-        $_SESSION['ultimo_acesso'] = time();
+        $_SESSION['ultimo_acesso'] = time(); // Importante para não dar expirado
     }
 }
-include   '../scripts.php';
+// =========================================================================
+
+
+// 2. AGORA SIM, CARREGA O SISTEMA
+// Quando o scripts.php rodar, ele vai olhar a sessão, ver que já existe o $_SESSION['user']
+// que criamos acima, e vai deixar passar sem redirecionar.
+include '../scripts.php';
+require '../vendor/autoload.php';
+
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
-require  '../vendor/autoload.php';
+
+// ... Resto do seu código ...
 
 
 $id_usuario = Security::getUser()['id_usuario'];
