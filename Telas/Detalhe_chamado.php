@@ -17,6 +17,7 @@ $segredo_sistema = 'a3f9e2d1c8b7a60594837261504938271605948372615049382716059483
 // Captura variáveis de forma segura (evita erro de undefined index)
 $id_chamado     = $_GET['id_chamado'] ?? 'NÃO INFORMADO';
 $id_usuario     = $_GET['id_usuario'] ?? 'NÃO INFORMADO';
+$id_perfil     = $_GET['id_perfil'] ?? 'NÃO INFORMADO';
 $token_recebido = $_GET['token'] ?? 'NÃO INFORMADO';
 $ds_nome        = isset($_GET['ds_nome']) ? urldecode($_GET['ds_nome']) : 'Usuario WhatsApp';
 
@@ -79,7 +80,7 @@ if (hash_equals($token_calculado, $token_recebido)) {
         'ds_nome'    => $ds_nome,
         'ds_email'   => 'suporte@ibranutro.com.br',
         'ds_senha'   => '***',
-        'id_perfil'  => 2,
+        'id_perfil'  => $id_perfil,
         'ds_perfil'  => 'Acesso Remoto',
         'st_ativo'   => 'A',
         'st_reset_senha' => 'N'
