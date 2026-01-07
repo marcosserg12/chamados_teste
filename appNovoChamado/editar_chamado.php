@@ -23,10 +23,12 @@ try {
         "*Confira em:* \n" .
         "https://chamados.sisibranutro.com.br/Telas/Detalhe_chamado.php?id_chamado={$_POST['id_chamado']}";
 
+    if($nu_telefone_responsavel != null){
+        $responsavel = '55' . $nu_telefone_responsavel;
+        $evolutionSender->sendMessage($responsavel, $mensagem);
 
-    $responsavel = '55' . $nu_telefone_responsavel;
+    }
     $dono = '55' . $nu_telefone_dono;
-    $evolutionSender->sendMessage($responsavel, $mensagem);
     $evolutionSender->sendMessage($dono, $mensagem);
 
 
