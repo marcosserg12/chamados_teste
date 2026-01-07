@@ -1,7 +1,4 @@
 <?php
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
 
 
 $segredo_sistema = 'a3f9e2d1c8b7a6059483726150493827160594837261504938271605948372b1';
