@@ -354,7 +354,7 @@ if ($dados['st_status'] == 0) {
                                                 </button>
                                                 <a href="' . $caminho . '" download class="text-gray-500 text-xs hover:underline">Baixar</a>
                                             </div>';
-                                        } else if ($extensao === 'pptx' || $extensao === 'docx' || $extensao === 'xlsx' || $extensao === 'xlsm ' || $extensao === 'xltx' || $extensao === 'xls') {
+                                        } else {
                                             echo '
                                             <div class="border p-2 rounded shadow bg-white w-44">
                                                 <div class="text-sm text-gray-600 truncate mb-2">' . $nome . '</div>
